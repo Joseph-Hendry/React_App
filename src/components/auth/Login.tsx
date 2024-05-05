@@ -12,7 +12,7 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import User from "./User";
+import User from "../user/User";
 import axios from "axios";
 
 const Login = () => {
@@ -56,19 +56,23 @@ const Login = () => {
 
                 <Box sx={{ mt: 1 }}>
                     <TextField
+                        required
                         fullWidth
                         margin="normal"
                         label="Email Address"
                         autoComplete="email"
-                        value={email} onChange={(e) => setEmail(e.target.value)}/>
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}/>
 
                     <TextField
+                        required
                         fullWidth
                         margin="normal"
                         label="Password"
                         type="password"
                         autoComplete="current-password"
-                        value={password} onChange={(e) => setPassword(e.target.value)}/>
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}/>
 
                     <Button
                         fullWidth

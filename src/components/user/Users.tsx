@@ -9,7 +9,7 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import CSS from 'csstype';
-import {useUserStore} from "../store";
+import {useUserStore} from "../../store";
 
 const card: CSS.Properties = {
     padding: "10px",
