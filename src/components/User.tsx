@@ -15,7 +15,7 @@ const User = () => {
 
     React.useEffect(() => {
         const getUser = () => {
-            axios.get('http://localhost:3000/api/users/'+id)
+            axios.get('http://localhost:4941/api/v1/users/'+id)
                 .then((response) => {
                     setErrorFlag(false);
                     setErrorMessage("");
