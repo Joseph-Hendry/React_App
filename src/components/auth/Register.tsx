@@ -11,7 +11,6 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import axios from "axios";
 import {useUserStore} from "../../store";
-import {Alert, Snackbar} from "@mui/material";
 
 const Register = () => {
 
@@ -136,15 +135,6 @@ const Register = () => {
                         Already have an account? Sign in
                     </Link>
                 </Box>
-
-                {/*<Button onClick={handleOpen}>Show Toast</Button>*/}
-
-                {/*<Snackbar*/}
-                {/*    open={open}*/}
-                {/*    autoHideDuration={6000}*/}
-                {/*    onClose={handleClose}*/}
-                {/*    message="Note archived"*/}
-                {/*/>*/}
             </Box>
         </Container>
     );

@@ -60,15 +60,18 @@ const PetitionCard = (props: IPetitionProps) => {
         getPetitionsImg();
     }, [petition.petitionId]);
 
-
-    // Get the category
+    // Get the category name
     React.useEffect(() => {
         const getPetitionsCategory = () => {
             if (categories && categories.length > 0) {
                 const category = categories.find((category) => category.categoryId === petition.categoryId);
                 if (category) {
                     setCategoryName(category.name);
+                } else {
+                    setCategoryName("Unknown");
                 }
+            } else {
+                setCategoryName("Unknown");
             }
         };
         getPetitionsCategory();

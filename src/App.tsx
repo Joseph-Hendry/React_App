@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import NotFound from "./components/NotFound";
 import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
+import PetitionsPaper from "./components/petitions/PetitionsPaper";
 import Petitions from "./components/petitions/Petitions";
 
 function App() {
