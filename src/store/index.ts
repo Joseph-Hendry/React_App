@@ -1,31 +1,37 @@
 import create from 'zustand';
 
-interface UserState {
-    users: User[];
-    setUsers: (users: User[]) => void;
-    editUser: (user: User, newUsername: string) => void;
-    removeUser: (user: User) => void;
+// Define store
+type UserStore = {
+    user: User | null;
+    loginInfo: UserLogin | null;
+    registerInfo: UserRegister | null;
+    setUser: (user: User | null) => void;
+    setLoginInfo: (loginInfo: UserLogin | null) => void;
+    setRegisterInfo: (registerInfo: UserRegister | null) => void;
 }
 
-const getLocalStorage = (key: string): User[] => JSON.parse(window.localStorage.getItem(key) as string) || [];
-const setLocalStorage = (key: string, value: User[]) => window.localStorage.setItem(key, JSON.stringify(value));
+type PetitionsStore = {
+    petitions: Petitions | null;
+    categories: Category[] | null;
+    setPetitions: (petitions: Petitions | null) => void;
+    setCategories: (categories: Category[] | null) => void;
+}
 
-const useStore = create<UserState>((set) => ({
-    users: getLocalStorage('users'),
-    setUsers: (users: User[]) => set(() => {
-        setLocalStorage('users', users);
-        return { users };
-    }),
-    editUser: (user: User, newUsername: string) => set((state) => {
-        const temp = state.users.map(u => u.user_id === user.user_id ? { ...u, username: newUsername } : u);
-        setLocalStorage('users', temp);
-        return { users: temp };
-    }),
-    removeUser: (user: User) => set((state) => {
-        const temp = state.users.filter(u => u.user_id !== user.user_id);
-        setLocalStorage('users', temp);
-        return { users: temp };
-    })
+// Create store
+const useUserStore = create<UserStore>((set) => ({
+    user: null,
+    loginInfo: null,
+    registerInfo: null,
+    setUser: (user) => set({ user }),
+    setLoginInfo: (loginInfo) => set({ loginInfo }),
+    setRegisterInfo: (registerInfo) => set({ registerInfo })
 }));
 
-export const useUserStore = useStore;
+const usePetitionStore = create<PetitionsStore>((set) => ({
+    petitions: null,
+    categories: null,
+    setPetitions: (petitions) => set({ petitions }),
+    setCategories: (categories) => set({ categories })
+}));
+
+export { useUserStore, usePetitionStore };

@@ -3,32 +3,32 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
-import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import User from "../user/User";
+import { useUserStore } from "../../store";
 import axios from "axios";
 
 const Login = () => {
 
+    // Error flags
     const [errorFlag, setErrorFlag] = React.useState(false);
     const [errorMessage, setErrorMessage] = React.useState("");
 
+    // Form values
     const [email, setEmail] = React.useState("");
     const [password, setPassword] = React.useState("");
 
-    const [user, setUser] = React.useState<User>({user_id:0, username:""});
+    // User information
+    const setLoginInfo = useUserStore((state) => state.setLoginInfo);
 
+    // Submits the login form
     const handleSubmit = () => {
         axios.post('http://localhost:3000/api/v1/users/login', { email:email, password:password })
             .then((response) => {
-                setUser(response.data);
+                setLoginInfo(response.data);
             }, (error) => {
                 setErrorFlag(true);
                 setErrorMessage(error.toString());

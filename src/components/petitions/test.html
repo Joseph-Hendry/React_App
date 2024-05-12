@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flexbox Examples</title>
+    <style>
+        .container1 {
+            width: 200px;
+            height: 600px;
+            background-color: #282c34;
+        }
+
+        .container2 {
+            display: flex;
+            height: 100%;
+            flex-direction: column;
+        }
+
+        .item1 {
+            flex: none;
+            background-color: #f0f0f0;
+            padding: 10px;
+            margin: 5px;
+            height: 20px;
+            text-align: center;
+        }
+
+        .item3 {
+            flex: 1;
+            background-color: #f0f0f0;
+            padding: 10px;
+            margin: 5px;
+            height: 20px;
+            text-align: center;
+        }
+
+        .item2 {
+            flex: none;
+            background-color: #f0f0f0;
+            padding: 10px;
+            margin: 5px;
+            height: 20px;
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+
+<!-- Example 1: Equal Flexibility for All Items -->
+<div class="container1">
+    <div class="container2">
+        <div class="item1">Item 1</div>
+        <div class="item1">Item 2</div>
+        <div class="item3"></div>
+        <div class="item2">Item 3</div>
+    </div>
+</div>
+
+</body>
+</html>
