@@ -6,7 +6,8 @@ import {
     Card,
     CardContent,
     CardMedia,
-    Typography} from '@mui/material';
+    Typography,
+    Avatar} from '@mui/material';
 import {usePetitionStore} from "../../store";
 
 // Petition Interface
@@ -17,7 +18,7 @@ interface IPetitionProps {
 // Card CSS
 const card: CSS.Properties = {
     display: "inline-block",
-    height: "450px",
+    height: "470px",
     width: "300px",
     margin: "10px",
     padding: "00px"
@@ -39,14 +40,15 @@ const PetitionCard = (props: IPetitionProps) => {
     // Petition and photo
     const { petition } = props;
     const [petitionImageURL, setPetitionImageURL] = React.useState("https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png");
+    const [petitionOwnerImageURL, setPetitionOwnerImageURL] = React.useState("https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png");
 
     // Categories
     const categories = usePetitionStore((state) => state.categories);
     const [categoryName, setCategoryName] = React.useState("");
 
-    // Gets the image
+    // Gets the petition image
     React.useEffect(() => {
-        const getPetitionsImg = () => {
+        const getPetitionImg = () => {
             axios.get(`http://localhost:3000/api/v1/petitions/${petition.petitionId}/image`, {responseType: "blob"})
                 .then((response) => {
                     setErrorFlag(false);
@@ -57,8 +59,24 @@ const PetitionCard = (props: IPetitionProps) => {
                     setErrorMessage(error.toString());
                 });
         };
-        getPetitionsImg();
+        getPetitionImg();
     }, [petition.petitionId]);
+
+    // Gets the petition owners image
+    React.useEffect(() => {
+        const getPetitionOwnerImg = () => {
+            axios.get(`http://localhost:3000/api/v1/users/${petition.ownerId}/image`, {responseType: "blob"})
+                .then((response) => {
+                    setErrorFlag(false);
+                    setErrorMessage("");
+                    setPetitionOwnerImageURL(URL.createObjectURL(response.data));
+                }, (error) => {
+                    setErrorFlag(true);
+                    setErrorMessage(error.toString());
+                });
+        };
+        getPetitionOwnerImg();
+    }, [petition.ownerId]);
 
     // Get the category name
     React.useEffect(() => {
@@ -106,18 +124,27 @@ const PetitionCard = (props: IPetitionProps) => {
                     {petition.title}
                 </Typography>
 
-                {/* Owner */}
-                <Typography variant="subtitle1" color="text.secondary">
-                    {petition.ownerFirstName + " " + petition.ownerLastName}
-                </Typography>
+                <Box sx={{flex: "none", display: "flex", justifyContent: "left", marginTop: 1}} >
+                    <Avatar
+                        src={petitionOwnerImageURL}
+                        sx={{ width: 47, height: 47, marginRight: 1 }}
+                    />
 
-                {/* Category */}
-                <Typography variant="body2" color="text.secondary">
-                    {categoryName}
-                </Typography>
+                    <Box >
+                        {/* Owner */}
+                        <Typography variant="subtitle1" color="text.secondary">
+                            {petition.ownerFirstName + " " + petition.ownerLastName}
+                        </Typography>
+
+                        {/* Category */}
+                        <Typography variant="body2" color="text.secondary">
+                            {categoryName}
+                        </Typography>
+                    </Box>
+                </Box>
 
                 {/* Box at the bottom */}
-                <Box flex={"none"} display="flex" justifyContent="space-between" >
+                <Box sx={{flex: "none", display: "flex", justifyContent: "space-between", marginTop: 1}} >
 
                     {/* Supporting Cost */}
                     <Typography variant="body2" color="text.secondary">
@@ -128,6 +155,7 @@ const PetitionCard = (props: IPetitionProps) => {
                     <Typography variant="body2" color="text.secondary">
                         {formattedDate}
                     </Typography>
+
                 </Box>
             </CardContent>
         </Card>

@@ -15,7 +15,7 @@ function App() {
             <Routes>
               <Route path="/users/login" element={<Login />} />
               <Route path="/users/register" element={<Register />} />
-              <Route path="/petitions" element={<Petitions />} />
+              <Route path="/petitions" element={<PetitionsPaper />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>

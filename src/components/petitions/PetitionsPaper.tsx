@@ -3,9 +3,14 @@ import PetitionCard from "./PetitionCard";
 import { usePetitionStore } from "../../store";
 import axios from "axios";
 import CSS from 'csstype';
+import MenuIcon from '@mui/icons-material/Menu';
 import {
     Paper,
-    Typography} from '@mui/material';
+    Typography,
+    Toolbar,
+    IconButton,
+    Button,
+    AppBar} from '@mui/material';
 
 // Paper CSS
 const paper: CSS.Properties = {
@@ -72,17 +77,38 @@ const PetitionsPaper = () => {
     const petition_rows = () => petitions?.petitions.map((petition: Petition) => <PetitionCard key={ petition.petitionId } petition={petition} />);
 
     return (
-        // Paper for cards
-        <Paper elevation={24} style={paper}>
+        <>
+            {/* Navigation Bar */}
+            <AppBar position="static">
+                <Toolbar>
+                    <IconButton
+                        size="large"
+                        edge="start"
+                        color="inherit"
+                        aria-label="menu"
+                        sx={{ mr: 2 }}
+                    >
+                        <MenuIcon />
+                    </IconButton>
+                    <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+                        News
+                    </Typography>
+                    <Button color="inherit">Login</Button>
+                </Toolbar>
+            </AppBar>
 
-            {/* Title */}
-            <Typography variant="h4" style={titleStyle}>
-                Petitions
-            </Typography>
+            {/* Paper for cards */}
+            <Paper elevation={24} style={paper}>
 
-            {/* List of cards */}
-            {petition_rows()}
-        </Paper>
+                {/* Title */}
+                <Typography variant="h4" style={titleStyle}>
+                    Petitions
+                </Typography>
+
+                {/* List of cards */}
+                {petition_rows()}
+            </Paper>
+        </>
     );
 };
 
