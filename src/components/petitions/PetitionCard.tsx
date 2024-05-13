@@ -124,12 +124,16 @@ const PetitionCard = (props: IPetitionProps) => {
                     {petition.title}
                 </Typography>
 
+                {/* Profile Photo & Name Box */}
                 <Box sx={{flex: "none", display: "flex", justifyContent: "left", marginTop: 1}} >
+
+                    {/* Profile Photo */}
                     <Avatar
                         src={petitionOwnerImageURL}
                         sx={{ width: 47, height: 47, marginRight: 1 }}
                     />
 
+                    {/* Name & Category Box */}
                     <Box >
                         {/* Owner */}
                         <Typography variant="subtitle1" color="text.secondary">
@@ -155,7 +159,6 @@ const PetitionCard = (props: IPetitionProps) => {
                     <Typography variant="body2" color="text.secondary">
                         {formattedDate}
                     </Typography>
-
                 </Box>
             </CardContent>
         </Card>
