@@ -16,14 +16,14 @@ type Petitions = {
 }
 
 type PetitionSearch = {
-    startIndex: number,
-    count?: number,
-    q?: string,
-    categoryIds?: Array<number>,
-    supportingCost?: number,
-    ownerId?: number,
-    supporterId?: number,
-    sortBy?: string
+    "startIndex": number,
+    "count"?: number,
+    "q"?: string,
+    "categoryIds"?: Array<number>,
+    "supportingCost"?: number,
+    "ownerId"?: number,
+    "supporterId"?: number,
+    "sortBy"?: string
 }
 
 type Category = {

@@ -1,73 +1,98 @@
-import React from 'react';
-import MenuIcon from '@mui/icons-material/Menu';
+import * as React from 'react';
+import PetitionCard from "./PetitionCard";
+import SearchBar from "./SearchBar";
+import { usePetitionStore } from "../../store";
+import axios from "axios";
+import CSS from 'csstype';
+import InboxIcon from '@mui/icons-material/MoveToInbox';
+import MailIcon from '@mui/icons-material/Mail';
+
 import {
-    AppBar,
-    Toolbar,
-    Typography,
-    Drawer,
-    IconButton,
-    Box,
-    Button,
-    List,
-    ListItem,
-    ListItemText} from '@mui/material';
+    Paper,
+    Typography
+} from '@mui/material';
+
+// Paper CSS
+const paper: CSS.Properties = {
+    padding: "10px",
+    margin: "20px",
+    width: "fit-content",
+    maxWidth: "965px",
+    minWidth: "320",
+    display: "inline-block"
+};
+
+// Title CSS
+const titleStyle: CSS.Properties = {
+    margin: "20px",
+    color: "#333",
+    fontWeight: "bold",
+    textTransform: "uppercase",
+};
 
 const Petitions = () => {
+
+    // Error flags
+    const [errorFlag, setErrorFlag] = React.useState(false);
+    const [errorMessage, setErrorMessage] = React.useState("");
+
+    // Petitions
+    const petitions = usePetitionStore((state) => state.petitions);
+    const setPetitions = usePetitionStore((state) => state.setPetitions);
+    const setCategories = usePetitionStore((state) => state.setCategories);
+
+    // Get the list of petitions
+    React.useEffect(() => {
+        const getPetitions = () => {
+            axios.get('http://localhost:3000/api/v1/petitions', {})
+                .then((response) => {
+                    setErrorFlag(false);
+                    setErrorMessage("");
+                    setPetitions(response.data);
+                }, (error) => {
+                    setErrorFlag(true);
+                    setErrorMessage(error.toString());
+                });
+        };
+        getPetitions();
+    }, [setPetitions]);
+
+    // Get the list of categories
+    React.useEffect(() => {
+        const getPetitions = () => {
+            axios.get('http://localhost:3000/api/v1/petitions/categories', {})
+                .then((response) => {
+                    setErrorFlag(false);
+                    setErrorMessage("");
+                    setCategories(response.data);
+                }, (error) => {
+                    setErrorFlag(true);
+                    setErrorMessage(error.toString());
+                });
+        };
+        getPetitions();
+    }, [setCategories]);
+
+    // Get the cards
+    const petition_rows = () => petitions?.petitions.map((petition: Petition) => <PetitionCard key={ petition.petitionId } petition={petition} />);
+
     return (
-        <Box sx={{ flexGrow: 1 }}>
-            <AppBar position="static">
-                <Toolbar>
-                    <IconButton
-                        size="large"
-                        edge="start"
-                        color="inherit"
-                        aria-label="menu"
-                        sx={{ mr: 2 }}
-                    >
-                        <MenuIcon />
-                    </IconButton>
-                    <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                        News
-                    </Typography>
-                    <Button color="inherit">Login</Button>
-                </Toolbar>
-            </AppBar>
+        <>
+            {/* Search Bar */}
+            <SearchBar/>
 
-            {/* Sidebar */}
-            <Drawer
-                variant="permanent"
-                sx={{
-                    width: 240,
-                    flexShrink: 0,
-                    '& .MuiDrawer-paper': {
-                        width: 240,
-                        boxSizing: 'border-box',
-                    },
-                }}
-            >
-                <Toolbar />
-                <List>
-                    <ListItem button>
-                        <ListItemText primary="Search Condition 1" />
-                    </ListItem>
-                    <ListItem button>
-                        <ListItemText primary="Search Condition 2" />
-                    </ListItem>
-                    {/* Add more search conditions as needed */}
-                </List>
-            </Drawer>
+            {/* Paper for cards */}
+            <Paper elevation={24} style={paper}>
 
-            {/* Main Content */}
-            <div style={{ flexGrow: 1, padding: '20px' }}>
-                {/* Your main content goes here */}
-                <Typography variant="h4" gutterBottom>
-                    Welcome to Your App
+                {/* Title */}
+                <Typography variant="h4" style={titleStyle}>
+                    Petitions
                 </Typography>
-                <Typography variant="body1">
-                    This is your main content area where you can display your app's content.
-                </Typography>
-            </div>
-        </Box>
+
+                {/* List of cards */}
+                {petition_rows()}
+            </Paper>
+        </>
     );
 };
 

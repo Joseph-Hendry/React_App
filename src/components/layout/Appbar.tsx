@@ -20,12 +20,15 @@ const Appbar = () => {
 
 
     return (
-        <AppBar position="sticky">
+        <AppBar position="sticky" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
             <Toolbar>
+
+                {/* Title */}
                 <Typography variant="h6" sx={{ display: 'block', marginRight: 5 }}>
                     Petition Site
                 </Typography>
 
+                {/* Buttons */}
                 <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
                     {navItems.map((item) => (
                         <Button key={item} sx={{ color: '#fff' }}>

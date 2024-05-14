@@ -12,10 +12,18 @@ type UserStore = {
 
 type PetitionsStore = {
     petitions: Petitions | null;
-    categories: Category[] | null;
+    categories: Category[];
     setPetitions: (petitions: Petitions | null) => void;
-    setCategories: (categories: Category[] | null) => void;
+    setCategories: (categories: Category[]) => void;
 }
+
+interface PetitonSearchI {
+    petitionSearch: PetitionSearch;
+    setPetitionSearch: (petitionSearch: PetitionSearch) => void;
+}
+
+const getLocalStorage = (key: string): PetitionSearch => JSON.parse(window.localStorage.getItem(key) as string) || {startIndex: 0};
+const setLocalStorage = (key: string, value: PetitionSearch) => window.localStorage.setItem(key, JSON.stringify(value));
 
 // Create store
 const useUserStore = create<UserStore>((set) => ({
@@ -29,9 +37,14 @@ const useUserStore = create<UserStore>((set) => ({
 
 const usePetitionStore = create<PetitionsStore>((set) => ({
     petitions: null,
-    categories: null,
+    categories: [],
     setPetitions: (petitions) => set({ petitions }),
-    setCategories: (categories) => set({ categories })
+    setCategories: (newCategories) => set({ categories: newCategories })
 }));
 
-export { useUserStore, usePetitionStore };
+const usePetitionSearchStore = create<PetitonSearchI>((set) => ({
+    petitionSearch: { startIndex: 0 },
+    setPetitionSearch: (newSearch) => set({ petitionSearch: newSearch })
+}));
+
+export { useUserStore, usePetitionStore, usePetitionSearchStore };
