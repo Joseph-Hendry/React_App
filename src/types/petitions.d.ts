@@ -19,7 +19,7 @@ type PetitionSearch = {
     "startIndex": number,
     "count"?: number,
     "q"?: string,
-    "categoryIds"?: Array<number>,
+    "categoryIds"?: number[],
     "supportingCost"?: number,
     "ownerId"?: number,
     "supporterId"?: number,

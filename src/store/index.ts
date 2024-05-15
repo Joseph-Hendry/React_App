@@ -43,7 +43,7 @@ const usePetitionStore = create<PetitionsStore>((set) => ({
 }));
 
 const usePetitionSearchStore = create<PetitonSearchI>((set) => ({
-    petitionSearch: { startIndex: 0 },
+    petitionSearch: { startIndex: 0, sortBy: "CREATED_ASC" },
     setPetitionSearch: (newSearch) => set({ petitionSearch: newSearch })
 }));
 

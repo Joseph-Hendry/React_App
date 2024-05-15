@@ -1,7 +1,7 @@
 import * as React from 'react';
 import PetitionCard from "./PetitionCard";
 import SearchBar from "./SearchBar";
-import { usePetitionStore } from "../../store";
+import {usePetitionSearchStore, usePetitionStore} from "../../store";
 import axios from "axios";
 import CSS from 'csstype';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
@@ -40,11 +40,12 @@ const Petitions = () => {
     const petitions = usePetitionStore((state) => state.petitions);
     const setPetitions = usePetitionStore((state) => state.setPetitions);
     const setCategories = usePetitionStore((state) => state.setCategories);
+    const petitionSearch = usePetitionSearchStore((state) => state.petitionSearch)
 
     // Get the list of petitions
     React.useEffect(() => {
         const getPetitions = () => {
-            axios.get('http://localhost:3000/api/v1/petitions', {})
+            axios.get('http://localhost:3000/api/v1/petitions', {params: petitionSearch})
                 .then((response) => {
                     setErrorFlag(false);
                     setErrorMessage("");
@@ -55,7 +56,7 @@ const Petitions = () => {
                 });
         };
         getPetitions();
-    }, [setPetitions]);
+    }, [petitionSearch, setPetitions]);
 
     // Get the list of categories
     React.useEffect(() => {

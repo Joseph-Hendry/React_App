@@ -1,3 +1,6 @@
+import * as React from "react";
+import {usePetitionSearchStore, usePetitionStore} from "../../store";
+import { SelectChangeEvent } from '@mui/material/Select';
 import {
     Box, Button,
     Divider, Drawer,
@@ -15,11 +18,11 @@ import {
     OutlinedInput,
     Chip
 } from "@mui/material";
-import * as React from "react";
-import {usePetitionStore} from "../../store";
-import { SelectChangeEvent } from '@mui/material/Select';
-import { Theme, useTheme } from '@mui/material/styles';
 
+// Global Varibles
+const INITIAL_PRICE = 50;
+const MAX_PRICE = 100;
+const MIN_PRICE = 0;
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
@@ -31,26 +34,7 @@ const MenuProps = {
     },
 };
 
-function getStyles(name: string, personName: readonly string[], theme: Theme) {
-    return {
-        fontWeight:
-            personName.indexOf(name) === -1
-                ? theme.typography.fontWeightRegular
-                : theme.typography.fontWeightMedium,
-    };
-}
-
-const marks = [
-    {
-        value: 0,
-        label: '0',
-    },
-    {
-        value: 100,
-        label: '100',
-    },
-];
-
+// Sort options and string values
 const sortOptions = [
     {
         value: "ALPHABETICAL_ASC",
@@ -78,24 +62,36 @@ const sortOptions = [
     },
 ];
 
-function valuetext(value: number) {
-    return `${value}`;
-}
+// Price values
+const marks = [
+    {
+        value: MIN_PRICE,
+        label: '',
+    },
+    {
+        value: MAX_PRICE,
+        label: '',
+    },
+];
 
 const SearchBar = () => {
 
-    // Get stored varibles
-    const categories = usePetitionStore((state) => state.categories);
-
-    const [sortOptionSelected, setSortOptionSelected] = React.useState('ALPHABETICAL_ASC')
-
+    // Form variables
+    const [search, setSearch] = React.useState('')
     const [categoriesSelectedIds, setCategoriesSelectedIds] = React.useState<string[]>([]);
-    const theme = useTheme();
+    const [price, setPrice] = React.useState(INITIAL_PRICE);
+    const [sortOptionSelected, setSortOptionSelected] = React.useState('CREATED_ASC')
 
-    const handleChangeSortBy = (event: SelectChangeEvent) => {
-        setSortOptionSelected(event.target.value as string);
-    };
+    // Get stored variables
+    const categories = usePetitionStore((state) => state.categories);
+    const setPetitionSearch = usePetitionSearchStore((state) => state.setPetitionSearch)
 
+    // Handles search change
+    const handleChangeSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSearch(event.target.value)
+    }
+
+    // Handles category change
     const handleChangeCategories = (event: SelectChangeEvent<typeof categoriesSelectedIds>) => {
         const {
             target: {value},
@@ -105,6 +101,27 @@ const SearchBar = () => {
             typeof value === 'string' ? value.split(',') : value
         );
     };
+
+    // Handles price change
+    const handleChangePrice = (event: Event, newPrice: number | number[]) => {
+        setPrice(newPrice as number);
+    };
+
+    // Handles sort by change
+    const handleChangeSortBy = (event: SelectChangeEvent) => {
+        setSortOptionSelected(event.target.value as string);
+    };
+
+    // Handles submit
+    const handleSubmit = () => {
+        setPetitionSearch({
+            startIndex:0,
+            q: search || undefined,
+            categoryIds: categoriesSelectedIds.length > 0 ? categoriesSelectedIds.map(Number): undefined,
+            supportingCost: price !== 100 ? price + 1: undefined,
+            sortBy: sortOptionSelected
+        })
+    }
 
     return (
         <Drawer
@@ -129,16 +146,12 @@ const SearchBar = () => {
 
                     {/* Search Box */}
                     <ListItem>
-                        <TextField id="outlined-basic" label="Title or Description" variant="outlined" fullWidth/>
-                    </ListItem>
-
-                    <Divider/>
-
-                    {/* Filter Title */}
-                    <ListItem>
-                        <Typography variant="h5">
-                            Filter
-                        </Typography>
+                        <TextField
+                            id="outlined-basic"
+                            label="Title or Description"
+                            variant="outlined"
+                            onChange={handleChangeSearch}
+                            fullWidth/>
                     </ListItem>
 
                     {/* Categories */}
@@ -174,22 +187,43 @@ const SearchBar = () => {
 
                     {/* Supporting Cost */}
                     <ListItem>
-                        <Slider
-                            aria-label="Restricted values"
-                            defaultValue={20}
-                            getAriaValueText={valuetext}
-                            step={null}
-                            valueLabelDisplay="auto"
-                            marks={marks}/>
-                    </ListItem>
 
-                    <Divider/>
+                        {/* Slider & Label Box */}
+                        <Box sx={{ width: 250 }}>
 
-                    {/* Sort Title */}
-                    <ListItem>
-                        <Typography variant="h5">
-                            Sort
-                        </Typography>
+                            {/* Label */}
+                            <Typography id="non-linear-slider" gutterBottom>
+                                Supporting Cost:
+                            </Typography>
+
+                            {/* Slider */}
+                            <Slider
+                                defaultValue={INITIAL_PRICE}
+                                max={100}
+                                aria-label="Default"
+                                value={price}
+                                valueLabelDisplay="auto"
+                                marks={marks}
+                                onChange={handleChangePrice}
+                            />
+
+                            {/* Label Boxes */}
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <Typography
+                                    variant="body2"
+                                    onClick={() => setPrice(MIN_PRICE)}
+                                    sx={{ cursor: 'pointer' }}
+                                >
+                                    Free
+                                </Typography>
+                                <Typography
+                                    variant="body2"
+                                    onClick={() => setPrice(MAX_PRICE)}
+                                    sx={{ cursor: 'pointer' }}>
+                                    All
+                                </Typography>
+                            </Box>
+                        </Box>
                     </ListItem>
 
                     {/* Sort Options */}
@@ -203,12 +237,7 @@ const SearchBar = () => {
                                 label="Sort Options"
                                 onChange={handleChangeSortBy}>
 
-                                {/* None Item */}
-                                <MenuItem value="">
-                                    <em>None</em>
-                                </MenuItem>
-
-                                {sortOptions.map((sortOption, index) => (
+                                {sortOptions.map((sortOption) => (
                                     <MenuItem key={sortOption.value} value={sortOption.value} >
                                         {sortOption.label}
                                     </MenuItem>
@@ -217,11 +246,9 @@ const SearchBar = () => {
                         </FormControl>
                     </ListItem>
 
-                    <Divider/>
-
                     {/* Submit Button */}
                     <ListItem>
-                        <Button variant="contained">Submit</Button>
+                        <Button variant="contained" onClick={handleSubmit}>Submit</Button>
                     </ListItem>
                 </List>
             </Box>
