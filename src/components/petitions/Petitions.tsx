@@ -76,7 +76,12 @@ const Petitions = () => {
                 });
         };
         getPetitions();
-    }, [page, petitionSearch, petitions?.count, setPetitions]);
+
+        // Check page number
+        if (page > pageNum) {
+            setPage(pageNum);
+        }
+    }, [page, pageNum, petitionSearch, petitions?.count, setPetitions]);
 
     // Get the list of categories
     React.useEffect(() => {
