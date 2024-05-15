@@ -2,13 +2,14 @@ import * as React from "react";
 import {usePetitionSearchStore, usePetitionStore} from "../../store";
 import { SelectChangeEvent } from '@mui/material/Select';
 import {
-    Box, Button,
-    Divider, Drawer,
+    Box,
+    Button,
+    Divider,
+    Drawer,
     List,
-    ListItem, Slider,
+    ListItem,
+    Slider,
     TextField,
-    ToggleButton,
-    ToggleButtonGroup,
     Toolbar,
     Typography,
     Select,

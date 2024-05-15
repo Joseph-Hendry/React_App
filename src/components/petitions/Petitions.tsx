@@ -1,16 +1,20 @@
 import * as React from 'react';
 import PetitionCard from "./PetitionCard";
 import SearchBar from "./SearchBar";
-import {usePetitionSearchStore, usePetitionStore} from "../../store";
+import {
+    usePetitionSearchStore,
+    usePetitionStore} from "../../store";
 import axios from "axios";
 import CSS from 'csstype';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
 
 import {
     Paper,
-    Typography
+    Typography,
+    Pagination
 } from '@mui/material';
+
+// Constants
+const ITEMS_PER_PAGE: number = 10;
 
 // Paper CSS
 const paper: CSS.Properties = {
@@ -42,21 +46,37 @@ const Petitions = () => {
     const setCategories = usePetitionStore((state) => state.setCategories);
     const petitionSearch = usePetitionSearchStore((state) => state.petitionSearch)
 
+    // Pagination Variables
+    const [page, setPage] = React.useState(1)
+    const [pageNum, setPageNum] = React.useState(10)
+
+    // Handles page change
+    const handleChangePage = (event: React.ChangeEvent<unknown>, value: number) => {
+        setPage(value);
+    };
+
     // Get the list of petitions
     React.useEffect(() => {
+
+        // Set pagination variables
+        petitionSearch.startIndex = (page - 1) * ITEMS_PER_PAGE;
+        petitionSearch.count = ITEMS_PER_PAGE;
+
+        // Send request
         const getPetitions = () => {
             axios.get('http://localhost:3000/api/v1/petitions', {params: petitionSearch})
                 .then((response) => {
                     setErrorFlag(false);
                     setErrorMessage("");
                     setPetitions(response.data);
+                    setPageNum(Math.ceil((petitions?.count ?? 0) / ITEMS_PER_PAGE))
                 }, (error) => {
                     setErrorFlag(true);
                     setErrorMessage(error.toString());
                 });
         };
         getPetitions();
-    }, [petitionSearch, setPetitions]);
+    }, [page, petitionSearch, petitions?.count, setPetitions]);
 
     // Get the list of categories
     React.useEffect(() => {
@@ -92,6 +112,15 @@ const Petitions = () => {
 
                 {/* List of cards */}
                 {petition_rows()}
+
+                {/* Pagination */}
+                <div style={{display: "flex", justifyContent: "center"}}>
+                    <Pagination
+                        count={pageNum}
+                        page={page}
+                        color="primary"
+                        onChange={handleChangePage}/>
+                </div>
             </Paper>
         </>
     );
