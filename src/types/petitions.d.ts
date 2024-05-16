@@ -10,6 +10,12 @@ type Petition = {
     creationDate: string;
 };
 
+type PetitionFull = {
+    description: string,
+    moneyRaised: number,
+    supportTiers: supportTier[]
+} & Petition
+
 type Petitions = {
     petitions: Petition[],
     count: number
@@ -29,4 +35,11 @@ type PetitionSearch = {
 type Category = {
     categoryId: number,
     name: string
+}
+
+type supportTier = {
+    supportTierId: number,
+    title: string,
+    description: string,
+    cost: number
 }

@@ -140,9 +140,9 @@ const PetitionCard = (props: IPetitionProps) => {
                             {petition.ownerFirstName + " " + petition.ownerLastName}
                         </Typography>
 
-                        {/* Category */}
+                        {/* Creation Date */}
                         <Typography variant="body2" color="text.secondary">
-                            {categoryName}
+                            {formattedDate}
                         </Typography>
                     </Box>
                 </Box>
@@ -155,9 +155,9 @@ const PetitionCard = (props: IPetitionProps) => {
                         {petition.supportingCost === 0 ? 'Free' : `$${petition.supportingCost}`}
                     </Typography>
 
-                    {/* Creation Date */}
+                    {/* Category */}
                     <Typography variant="body2" color="text.secondary">
-                        {formattedDate}
+                        {categoryName}
                     </Typography>
                 </Box>
             </CardContent>

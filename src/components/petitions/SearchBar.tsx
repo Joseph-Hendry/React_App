@@ -213,8 +213,7 @@ const SearchBar = () => {
                                 <Typography
                                     variant="body2"
                                     onClick={() => setPrice(MIN_PRICE)}
-                                    sx={{ cursor: 'pointer' }}
-                                >
+                                    sx={{ cursor: 'pointer' }}>
                                     Free
                                 </Typography>
                                 <Typography
