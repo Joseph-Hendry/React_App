@@ -28,7 +28,7 @@ const Register = () => {
     const [showPassword, setShowPassword] = React.useState(false);
 
     // User information
-    const setRegisterInfo = useUserStore((state) => state.setRegisterInfo);
+    // const setRegisterInfo = useUserStore((state) => state.setRegisterInfo);
 
     // Hides the password
     const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -47,7 +47,7 @@ const Register = () => {
         // Send request
         axios.post('http://localhost:3000/api/v1/users/register', requestBody)
             .then((response) => {
-                setRegisterInfo(response.data as UserRegister);
+                // setRegisterInfo(response.data as UserRegister);
                 console.log('Response:', response.data);
             }, (error) => {
                 setErrorFlag(true);

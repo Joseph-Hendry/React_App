@@ -2,12 +2,10 @@ import create from 'zustand';
 
 // Define store
 type UserStore = {
-    user: User | null;
-    loginInfo: UserLogin | null;
-    registerInfo: UserRegister | null;
-    setUser: (user: User | null) => void;
-    setLoginInfo: (loginInfo: UserLogin | null) => void;
-    setRegisterInfo: (registerInfo: UserRegister | null) => void;
+    userId: number;
+    userToken: string;
+    setUserId: (id: number) => void;
+    setUserToken: (token: string) => void;
 }
 
 type PetitionsStore = {
@@ -27,12 +25,10 @@ const setLocalStorage = (key: string, value: PetitionSearch) => window.localStor
 
 // Create store
 const useUserStore = create<UserStore>((set) => ({
-    user: null,
-    loginInfo: null,
-    registerInfo: null,
-    setUser: (user) => set({ user }),
-    setLoginInfo: (loginInfo) => set({ loginInfo }),
-    setRegisterInfo: (registerInfo) => set({ registerInfo })
+    userId: -1,
+    userToken: "",
+    setUserId: (id) => set({ userId: id }),
+    setUserToken: (token) => set({ userToken: token })
 }));
 
 const usePetitionStore = create<PetitionsStore>((set) => ({

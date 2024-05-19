@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -15,6 +16,9 @@ import {Visibility, VisibilityOff} from "@mui/icons-material";
 
 const Login = () => {
 
+    // For navigation
+    const navigate = useNavigate();
+
     // Error flags
     const [errorFlag, setErrorFlag] = React.useState(false);
     const [errorMessage, setErrorMessage] = React.useState("");
@@ -25,7 +29,7 @@ const Login = () => {
     const [showPassword, setShowPassword] = React.useState(false);
 
     // User information
-    const setLoginInfo = useUserStore((state) => state.setLoginInfo);
+    // const setLoginInfo = useUserStore((state) => state.setLoginInfo);
 
     // Hides the password
     const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -34,11 +38,13 @@ const Login = () => {
     const handleSubmit = () => {
         axios.post('http://localhost:3000/api/v1/users/login', { email:email, password:password })
             .then((response) => {
-                setLoginInfo(response.data);
+                // setLoginInfo(response.data);
+                navigate('/profile');
             }, (error) => {
                 setErrorFlag(true);
                 setErrorMessage(error.toString());
             });
+
     }
 
     return (
