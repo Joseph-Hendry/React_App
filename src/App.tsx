@@ -7,12 +7,14 @@ import Register from "./components/auth/Register";
 import Petitions from "./components/petitions/Petitions";
 import PetitionDetail from "./components/petitions/PetitionDetail";
 import Layout from "./components/layout/Layout";
+import Profile from "./components/user/Profile";
 
 function App() {
   return (
       <Router>
           <Layout>
               <Routes>
+                  <Route path="/users/profile" element={<Profile />} />
                   <Route path="/users/login" element={<Login />} />
                   <Route path="/users/register" element={<Register />} />
                   <Route path="/petitions" element={<Petitions />} />

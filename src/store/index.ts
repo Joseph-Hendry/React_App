@@ -3,9 +3,9 @@ import create from 'zustand';
 // Define store
 type UserStore = {
     userId: number;
-    userToken: string;
+    userToken: string | null;
     setUserId: (id: number) => void;
-    setUserToken: (token: string) => void;
+    setUserToken: (token: string | null) => void;
 }
 
 type PetitionsStore = {
@@ -26,7 +26,7 @@ const setLocalStorage = (key: string, value: PetitionSearch) => window.localStor
 // Create store
 const useUserStore = create<UserStore>((set) => ({
     userId: -1,
-    userToken: "",
+    userToken: null,
     setUserId: (id) => set({ userId: id }),
     setUserToken: (token) => set({ userToken: token })
 }));

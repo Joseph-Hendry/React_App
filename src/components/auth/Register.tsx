@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -16,6 +17,9 @@ import {Visibility, VisibilityOff} from "@mui/icons-material";
 
 const Register = () => {
 
+    // For navigation
+    const navigate = useNavigate();
+
     // Error flags
     const [errorFlag, setErrorFlag] = React.useState(false);
     const [errorMessage, setErrorMessage] = React.useState("");
@@ -28,7 +32,8 @@ const Register = () => {
     const [showPassword, setShowPassword] = React.useState(false);
 
     // User information
-    // const setRegisterInfo = useUserStore((state) => state.setRegisterInfo);
+    const setUserId = useUserStore((state) => state.setUserId);
+    const setUserToken = useUserStore((state) => state.setUserToken);
 
     // Hides the password
     const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -44,15 +49,34 @@ const Register = () => {
             "password": password
         };
 
-        // Send request
-        axios.post('http://localhost:3000/api/v1/users/register', requestBody)
-            .then((response) => {
-                // setRegisterInfo(response.data as UserRegister);
-                console.log('Response:', response.data);
-            }, (error) => {
-                setErrorFlag(true);
-                setErrorMessage(error.toString());
-            });
+        // Register
+        const register = () => {
+            axios.post('http://localhost:3000/api/v1/users/register', requestBody)
+                .then((response) => {
+                    login();
+                }, (error) => {
+                    setErrorFlag(true);
+                    setErrorMessage(error.toString());
+                });
+        }
+
+        // Login
+        const login = () => {
+            axios.post('http://localhost:3000/api/v1/users/login', {"email": email, "password": password})
+                .then((response) => {
+                    // Set data
+                    setUserId(response.data.userId);
+                    setUserToken(response.data.token);
+
+                    // Navigate to profile page
+                    navigate('/users/profile');
+                }, (error) => {
+                    setErrorFlag(true);
+                    setErrorMessage(error.toString());
+                });
+        }
+
+        register();
     }
 
     return (

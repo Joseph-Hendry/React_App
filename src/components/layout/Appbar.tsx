@@ -1,5 +1,6 @@
-import MenuIcon from "@mui/icons-material/Menu";
 import React from "react";
+import { useNavigate } from 'react-router-dom';
+import {useUserStore} from "../../store";
 import {
     AppBar,
     Button,
@@ -8,16 +9,64 @@ import {
     Typography,
     Box,
     Menu,
-    MenuItem, Avatar
+    MenuItem, Avatar, Tooltip
 } from "@mui/material";
 
 const navItems = ['Home', 'About', 'Contact'];
 
+const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
+
 const Appbar = () => {
+
+    // For navigation
+    const navigate = useNavigate();
+
+    // User information
+    const userId = useUserStore((state) => state.userId);
+    const userToken = useUserStore((state) => state.userToken);
+    const setUserId = useUserStore((state) => state.setUserId);
+    const setUserToken = useUserStore((state) => state.setUserToken);
 
     // Profile photo
     const [profileImageURL, setProfileImageURL] = React.useState("https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png");
 
+    // Menu Items
+    const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
+
+    // Handles opening menu
+    const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
+        setAnchorElUser(event.currentTarget);
+    };
+
+    // Handles closing menu
+    const handleCloseUserMenu = () => {
+        setAnchorElUser(null);
+    };
+
+    // Handles profile button
+    const handleProfile = () => {
+        setAnchorElUser(null);
+        navigate('/users/profile');
+    };
+
+    // Handles edit profile button
+    const handleEditProfile = () => {
+        setAnchorElUser(null);
+        navigate('/users/profile');
+    };
+
+    // Handles logout button
+    const handleLogout = () => {
+        setAnchorElUser(null);
+        setUserId(-1);
+        setUserToken(null);
+        navigate('/users/login');
+    };
+
+    // Handles login button
+    const handleLogin = () => {
+        navigate('/users/login');
+    };
 
     return (
         <AppBar position="sticky" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
@@ -41,12 +90,58 @@ const Appbar = () => {
                 <Box sx={{ flexGrow: 1, display: 'block', marginRight: 5 }} />
 
                 {/* Profile Photo */}
-                <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
-                    <Avatar
-                        src={profileImageURL}
-                        sx={{ width: 47, height: 47, marginRight: 1 }}
-                    />
-                </Box>
+                {userToken && (
+                    <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+
+                        {/* Profile Photo */}
+                        <Tooltip title="Open settings">
+                            <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                                <Avatar src={profileImageURL}
+                                        sx={{ width: 47, height: 47, marginRight: 1 }}/>
+                            </IconButton>
+                        </Tooltip>
+
+                        {/* Profile Settings */}
+                        <Menu
+                            sx={{ mt: '45px' }}
+                            id="menu-appbar"
+                            anchorEl={anchorElUser}
+                            anchorOrigin={{
+                                vertical: 'top',
+                                horizontal: 'right',
+                            }}
+                            keepMounted
+                            transformOrigin={{
+                                vertical: 'top',
+                                horizontal: 'right',
+                            }}
+                            open={Boolean(anchorElUser)}
+                            onClose={handleCloseUserMenu}>
+
+                            {/* Profile */}
+                            <MenuItem onClick={handleProfile}>
+                                <Typography textAlign="center">Profile</Typography>
+                            </MenuItem>
+
+                            {/* Edit Profile */}
+                            <MenuItem onClick={handleEditProfile}>
+                                <Typography textAlign="center">Edit Profile</Typography>
+                            </MenuItem>
+
+                            {/* Logout */}
+                            <MenuItem onClick={handleLogout}>
+                                <Typography textAlign="center">Logout</Typography>
+                            </MenuItem>
+                        </Menu>
+                    </Box>
+                )}
+
+                {/* Login Button */}
+                {!userToken && (
+                    <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+                        <Button color="inherit" onClick={handleLogin}>Login</Button>
+                    </Box>
+                )}
             </Toolbar>
         </AppBar>
     );

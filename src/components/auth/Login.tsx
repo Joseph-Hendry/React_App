@@ -29,7 +29,8 @@ const Login = () => {
     const [showPassword, setShowPassword] = React.useState(false);
 
     // User information
-    // const setLoginInfo = useUserStore((state) => state.setLoginInfo);
+    const setUserId = useUserStore((state) => state.setUserId);
+    const setUserToken = useUserStore((state) => state.setUserToken);
 
     // Hides the password
     const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -38,8 +39,9 @@ const Login = () => {
     const handleSubmit = () => {
         axios.post('http://localhost:3000/api/v1/users/login', { email:email, password:password })
             .then((response) => {
-                // setLoginInfo(response.data);
-                navigate('/profile');
+                setUserId(response.data.userId);
+                setUserToken(response.data.token)
+                navigate('/users/profile');
             }, (error) => {
                 setErrorFlag(true);
                 setErrorMessage(error.toString());

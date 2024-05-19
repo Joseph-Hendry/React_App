@@ -18,54 +18,35 @@ const Profile = () => {
     const [errorMessage, setErrorMessage] = React.useState("");
 
     // Form Varibles
-
-
-    // Handles page change
-    const handleChangePage = (event: React.ChangeEvent<unknown>, value: number) => {
-        setPage(value);
-    };
+    const [user, setUser] = React.useState<User|null>()
 
     // Get the list of categories
     React.useEffect(() => {
-        const getPetitions = () => {
-            axios.get('http://localhost:3000/api/v1/petitions/categories')
+        const getUser = () => {
+            axios.get('http://localhost:3000/api/v1/users/' + userId, { headers: { "X-Authorization": userToken }})
                 .then((response) => {
                     setErrorFlag(false);
                     setErrorMessage("");
-                    setCategories(response.data);
+                    setUser(response.data);
                 }, (error) => {
                     setErrorFlag(true);
                     setErrorMessage(error.toString());
                 });
         };
-        getPetitions();
-    }, [setCategories]);
+        getUser();
+    }, [userId, userToken]);
 
     return (
         <>
-            {/* Search Bar */}
-            <SearchBar/>
+            {/* Name */}
+            <Typography variant="h4">
+                {user?.firstName + " " + user?.lastName}
+            </Typography>
 
-            {/* Paper for cards */}
-            <Paper elevation={24} style={paper}>
-
-                {/* Title */}
-                <Typography variant="h4" style={titleStyle}>
-                    Petitions
-                </Typography>
-
-                {/* List of cards */}
-                {petition_rows()}
-
-                {/* Pagination */}
-                <div style={{display: "flex", justifyContent: "center"}}>
-                    <Pagination
-                        count={pageNum}
-                        page={page}
-                        color="primary"
-                        onChange={handleChangePage}/>
-                </div>
-            </Paper>
+            {/* Email */}
+            <Typography variant="h4">
+                {user?.email}
+            </Typography>
         </>
     );
 };
