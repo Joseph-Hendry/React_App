@@ -10,6 +10,8 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { useUserStore } from "../../store";
 import axios from "axios";
+import {IconButton, InputAdornment} from "@mui/material";
+import {Visibility, VisibilityOff} from "@mui/icons-material";
 
 const Login = () => {
 
@@ -20,9 +22,13 @@ const Login = () => {
     // Form values
     const [email, setEmail] = React.useState("");
     const [password, setPassword] = React.useState("");
+    const [showPassword, setShowPassword] = React.useState(false);
 
     // User information
     const setLoginInfo = useUserStore((state) => state.setLoginInfo);
+
+    // Hides the password
+    const handleClickShowPassword = () => setShowPassword((show) => !show);
 
     // Submits the login form
     const handleSubmit = () => {
@@ -69,10 +75,22 @@ const Login = () => {
                         fullWidth
                         margin="normal"
                         label="Password"
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         autoComplete="current-password"
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}/>
+                        onChange={(e) => setPassword(e.target.value)}
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        aria-label="toggle password visibility"
+                                        onClick={handleClickShowPassword}
+                                        edge="end">
+                                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
+                                </InputAdornment>
+                            )
+                        }}/>
 
                     <Button
                         fullWidth

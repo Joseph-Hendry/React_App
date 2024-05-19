@@ -11,6 +11,8 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import axios from "axios";
 import {useUserStore} from "../../store";
+import {IconButton, InputAdornment} from "@mui/material";
+import {Visibility, VisibilityOff} from "@mui/icons-material";
 
 const Register = () => {
 
@@ -23,9 +25,13 @@ const Register = () => {
     const [lastName, setLastName] = React.useState("");
     const [email, setEmail] = React.useState("");
     const [password, setPassword] = React.useState("");
+    const [showPassword, setShowPassword] = React.useState(false);
 
     // User information
     const setRegisterInfo = useUserStore((state) => state.setRegisterInfo);
+
+    // Hides the password
+    const handleClickShowPassword = () => setShowPassword((show) => !show);
 
     // Submits the register form
     const handleSubmit = () => {
@@ -48,17 +54,6 @@ const Register = () => {
                 setErrorMessage(error.toString());
             });
     }
-
-    // const [open, setOpen] = React.useState(false);
-    //
-    // const handleClose = () => {
-    //     setOpen(false);
-    // };
-    //
-    // const handleOpen = () => {
-    //     setOpen(true);
-    // };
-
 
     return (
         <Container component="main" maxWidth="xs">
@@ -116,10 +111,22 @@ const Register = () => {
                                 required
                                 fullWidth
                                 label="Password"
-                                type="password"
+                                type={showPassword ? "text" : "password"}
                                 autoComplete="new-password"
                                 value={password}
-                                onChange={(e) => setPassword(e.target.value)}/>
+                                onChange={(e) => setPassword(e.target.value)}
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                aria-label="toggle password visibility"
+                                                onClick={handleClickShowPassword}
+                                                edge="end">
+                                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    )
+                                }}/>
                         </Grid>
                     </Grid>
 
