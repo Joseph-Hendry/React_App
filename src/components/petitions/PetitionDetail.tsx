@@ -52,8 +52,9 @@ const PetitionDetail = () => {
     const [petitionOwnerImageURL, setPetitionOwnerImageURL] = React.useState("https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png");
 
     // Categories
-    const categories = usePetitionStore((state) => state.categories);
     const [categoryName, setCategoryName] = React.useState("");
+    const categories = usePetitionStore((state) => state.categories);
+    const setCategories = usePetitionStore((state) => state.setCategories);
 
     // Get the petition
     React.useEffect(() => {
@@ -86,6 +87,22 @@ const PetitionDetail = () => {
         };
         getPetitionImg();
     }, [id]);
+
+    // Get the list of categories
+    React.useEffect(() => {
+        const getPetitions = () => {
+            axios.get('http://localhost:3000/api/v1/petitions/categories', {})
+                .then((response) => {
+                    setErrorFlag(false);
+                    setErrorMessage("");
+                    setCategories(response.data);
+                }, (error) => {
+                    setErrorFlag(true);
+                    setErrorMessage(error.toString());
+                });
+        };
+        getPetitions();
+    }, [setCategories]);
 
     // Gets the petition owners image
     React.useEffect(() => {
