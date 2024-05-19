@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from 'react-router-dom';
 import {useUserStore} from "../../store";
+import axios from "axios";
 import {
     AppBar,
     Button,
@@ -21,6 +22,10 @@ const Appbar = () => {
     // For navigation
     const navigate = useNavigate();
 
+    // Error flags
+    const [errorFlag, setErrorFlag] = React.useState(false);
+    const [errorMessage, setErrorMessage] = React.useState("");
+
     // User information
     const userId = useUserStore((state) => state.userId);
     const userToken = useUserStore((state) => state.userToken);
@@ -32,6 +37,22 @@ const Appbar = () => {
 
     // Menu Items
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
+
+    // Gets the users profile image
+    React.useEffect(() => {
+        const getPetitionOwnerImg = () => {
+            axios.get(`http://localhost:3000/api/v1/users/${userId}/image`, {responseType: "blob"})
+                .then((response) => {
+                    setErrorFlag(false);
+                    setErrorMessage("");
+                    setProfileImageURL(URL.createObjectURL(response.data));
+                }, (error) => {
+                    setErrorFlag(true);
+                    setErrorMessage(error.toString());
+                });
+        };
+        getPetitionOwnerImg();
+    }, [userId]);
 
     // Handles opening menu
     const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
