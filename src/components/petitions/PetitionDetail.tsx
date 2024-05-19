@@ -91,7 +91,7 @@ const PetitionDetail = () => {
     // Get the list of categories
     React.useEffect(() => {
         const getPetitions = () => {
-            axios.get('http://localhost:3000/api/v1/petitions/categories', {})
+            axios.get('http://localhost:3000/api/v1/petitions/categories')
                 .then((response) => {
                     setErrorFlag(false);
                     setErrorMessage("");
