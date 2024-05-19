@@ -15,7 +15,6 @@ import {
 } from '@mui/material';
 import Box from "@mui/material/Box";
 import PetitionCard from "./PetitionCard";
-import petitions from "./Petitions";
 
 // Paper CSS
 const paper: CSS.Properties = {
@@ -148,7 +147,10 @@ const PetitionDetail = () => {
         getPetitionsCat();
     }, [petition?.categoryId, petition?.ownerId]);
 
-    // Get the cards
+    // Get the support tier cards
+    const support_tier_rows = () => petition?.supportTiers.map((supportTier: SupportTier) => <SupportTierCard key={ supportTier.supportTierId } supportTier={supportTier} />);
+
+    // Get the petition cards
     const petition_rows = () => petitions?.petitions.map((petition: Petition) => <PetitionCard key={ petition.petitionId } petition={petition} />);
 
     // Format the date
@@ -242,10 +244,10 @@ const PetitionDetail = () => {
                     </Typography>
 
                     {/* Scrollable box */}
-                    <Box sx={{ display: 'flex', width: "700px", gap: 2, overflowX: 'auto' }}> {/* Adjusted styles */}
+                    <Paper sx={{ display: 'flex', width: "700px", gap: 2, overflowX: 'auto' }}>
                         {/* List of cards */}
-                        {petition_rows()}
-                    </Box>
+                        {support_tier_rows()}
+                    </Paper>
 
                     {/* Similar Petitions Title */}
                     <Typography variant="h6">
@@ -253,13 +255,39 @@ const PetitionDetail = () => {
                     </Typography>
 
                     {/* Scrollable box */}
-                    <Box sx={{ display: 'flex', width: "700px", gap: 2, overflowX: 'auto' }}> {/* Adjusted styles */}
+                    <Paper sx={{ display: 'flex', width: "700px", gap: 2, overflowX: 'auto' }}>
                         {/* List of cards */}
                         {petition_rows()}
-                    </Box>
+                    </Paper>
                 </Box>
             </Paper>
         </>
+    )
+}
+
+// Petition Interface
+interface ISupportTierProps {
+    supportTier: SupportTier;
+}
+
+const SupportTierCard = (props: ISupportTierProps) => {
+
+    // Get Support Tier
+    const { supportTier } = props;
+
+    return (
+        <Card >
+            <Typography gutterBottom variant="h5" component="div">
+                {supportTier.title}
+            </Typography>
+
+            <Chip icon={<AttachMoneyIcon />} variant="outlined" label={supportTier?.cost}/>
+
+            {/* Description Body */}
+            <Typography variant="body2" maxWidth={300}>
+                {supportTier?.description}
+            </Typography>
+        </Card>
     )
 }
 
