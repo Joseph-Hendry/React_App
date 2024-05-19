@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import axios from "axios";
 import CSS from 'csstype';
@@ -32,6 +33,9 @@ const cardContent: CSS.Properties = {
 };
 
 const PetitionCard = (props: IPetitionProps) => {
+
+    // React Router's navigate hook
+    const navigate = useNavigate();
 
     // Error flags
     const [errorFlag, setErrorFlag] = React.useState(false);
@@ -95,6 +99,10 @@ const PetitionCard = (props: IPetitionProps) => {
         getPetitionsCategory();
     }, [categories, petition.categoryId]);
 
+    // Handle card click to navigate to petition detail page
+    const handleCardClick = () => {
+        navigate(`/petitions/${petition.petitionId}`);
+    };
 
     // Format the date
     const formattedDate: string = new Date(petition.creationDate).toLocaleDateString('en-US', {
@@ -105,7 +113,7 @@ const PetitionCard = (props: IPetitionProps) => {
     });
 
     return (
-        <Card sx={card}>
+        <Card sx={card} onClick={handleCardClick}>
 
             {/* Hero Image */}
             <CardMedia
