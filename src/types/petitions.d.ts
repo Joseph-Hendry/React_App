@@ -13,7 +13,7 @@ type Petition = {
 type PetitionFull = {
     description: string,
     moneyRaised: number,
-    supportTiers: supportTier[]
+    supportTiers: SupportTier[]
 } & Petition
 
 type Petitions = {
@@ -37,7 +37,7 @@ type Category = {
     name: string
 }
 
-type supportTier = {
+type SupportTier = {
     supportTierId: number,
     title: string,
     description: string,
