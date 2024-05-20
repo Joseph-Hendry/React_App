@@ -8,6 +8,7 @@ import Petitions from "./components/petitions/Petitions";
 import PetitionDetail from "./components/petitions/PetitionDetail";
 import Layout from "./components/layout/Layout";
 import Profile from "./components/user/Profile";
+import EditProfile from "./components/user/EditProfile";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
           <Layout>
               <Routes>
                   <Route path="/users/profile" element={<Profile />} />
+                  <Route path="/users/profile/edit" element={<EditProfile />} />
                   <Route path="/users/login" element={<Login />} />
                   <Route path="/users/register" element={<Register />} />
                   <Route path="/petitions" element={<Petitions />} />

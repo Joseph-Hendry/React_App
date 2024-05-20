@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 import {useUserStore} from "../../store";
 import {
@@ -6,8 +7,12 @@ import {
     Typography,
     Pagination, Avatar
 } from '@mui/material';
+import Link from "@mui/material/Link";
 
 const Profile = () => {
+
+    // For navigation
+    const navigate = useNavigate();
 
     // User information
     const userId = useUserStore((state) => state.userId);
@@ -74,6 +79,10 @@ const Profile = () => {
             <Typography variant="h4">
                 {user?.email}
             </Typography>
+
+            <Link onClick={() => {navigate("/users/profile/edit")}} variant="body2">
+                Edit Profile
+            </Link>
         </>
     );
 };
