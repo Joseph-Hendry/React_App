@@ -64,6 +64,7 @@ function App() {
                   )}
 
                   {/* Public Routes */}
+                  <Route path="/" element={<Navigate to="/petitions" />} />
                   <Route path="/petitions" element={<Petitions />} />
                   <Route path="/petitions/:id" element={<DetailPetition />} />
                   <Route path="*" element={<NotFound />} />
