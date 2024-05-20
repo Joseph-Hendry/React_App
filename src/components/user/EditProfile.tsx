@@ -19,6 +19,8 @@ import { useNavigate } from 'react-router-dom';
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 
 const EditProfile = () => {
+
+    // For navigation
     const navigate = useNavigate();
 
     // User information
@@ -130,7 +132,7 @@ const EditProfile = () => {
             }
 
             // Navigate to profile page
-            navigate('/users/profile');
+            navigate('/user/profile');
         } catch (error) {
             setErrorFlag(true);
             // setErrorMessage(error.toString());

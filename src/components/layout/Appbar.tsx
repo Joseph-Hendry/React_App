@@ -67,13 +67,13 @@ const Appbar = () => {
     // Handles profile button
     const handleProfile = () => {
         setAnchorElUser(null);
-        navigate('/users/profile');
+        navigate('/user/profile');
     };
 
     // Handles edit profile button
     const handleEditProfile = () => {
         setAnchorElUser(null);
-        navigate('/users/profile');
+        navigate('/user/profile');
     };
 
     // Handles logout button
@@ -81,18 +81,18 @@ const Appbar = () => {
         setAnchorElUser(null);
         setUserId(-1);
         setUserToken(null);
-        navigate('/users/login');
+        navigate('/auth/login');
     };
 
     // Handles logout button
     const handleMyPetitions = () => {
         setAnchorElUser(null);
-        navigate('/users/petitions');
+        navigate('/user/petitions');
     };
 
     // Handles login button
     const handleLogin = () => {
-        navigate('/users/login');
+        navigate('/auth/login');
     };
 
     return (

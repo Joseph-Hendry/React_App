@@ -80,7 +80,7 @@ const Profile = () => {
                 {user?.email}
             </Typography>
 
-            <Link onClick={() => {navigate("/users/profile/edit")}} variant="body2">
+            <Link onClick={() => {navigate("/user/profile/edit")}} variant="body2">
                 Edit Profile
             </Link>
         </>
