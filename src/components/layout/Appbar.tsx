@@ -84,6 +84,12 @@ const Appbar = () => {
         navigate('/users/login');
     };
 
+    // Handles logout button
+    const handleMyPetitions = () => {
+        setAnchorElUser(null);
+        navigate('/users/petitions');
+    };
+
     // Handles login button
     const handleLogin = () => {
         navigate('/users/login');
@@ -147,6 +153,11 @@ const Appbar = () => {
                             {/* Edit Profile */}
                             <MenuItem onClick={handleEditProfile}>
                                 <Typography textAlign="center">Edit Profile</Typography>
+                            </MenuItem>
+
+                            {/* My Petitions */}
+                            <MenuItem onClick={handleMyPetitions}>
+                                <Typography textAlign="center">My Petitions</Typography>
                             </MenuItem>
 
                             {/* Logout */}

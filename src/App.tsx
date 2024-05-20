@@ -9,6 +9,7 @@ import PetitionDetail from "./components/petitions/PetitionDetail";
 import Layout from "./components/layout/Layout";
 import Profile from "./components/user/Profile";
 import EditProfile from "./components/user/EditProfile";
+import CreatePetition from "./components/petitions/CreatePetition";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
                   <Route path="/users/register" element={<Register />} />
                   <Route path="/petitions" element={<Petitions />} />
                   <Route path="/petitions/:id" element={<PetitionDetail />} />
+                  <Route path="/petitions/create" element={<CreatePetition />} />
                   <Route path="*" element={<NotFound />} />
               </Routes>
           </Layout>

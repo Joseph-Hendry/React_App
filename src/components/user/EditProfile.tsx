@@ -16,6 +16,7 @@ import {
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 
 const EditProfile = () => {
     const navigate = useNavigate();
@@ -36,10 +37,12 @@ const EditProfile = () => {
     const [lastName, setLastName] = React.useState('');
     const [email, setEmail] = React.useState('');
     const [password, setPassword] = React.useState('');
-    const [showPassword, setShowPassword] = React.useState(false);
+    const [currentPassword, setCurrentPassword] = React.useState('');
+    const [showNewPassword, setShowNewPassword] = React.useState(false);
+    const [showOldPassword, setShowOldPassword] = React.useState(false);
 
     // Profile photo
-    const [profileImageURL, setProfileImageURL] = React.useState(
+    const [profilePictureURL, setProfilePictureURL] = React.useState(
         'https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png'
     );
     const [profilePicture, setProfilePicture] = React.useState<File | null>(null);
@@ -72,7 +75,7 @@ const EditProfile = () => {
                 const response = await axios.get(`http://localhost:3000/api/v1/users/${userId}/image`, {
                     responseType: 'blob',
                 });
-                setProfileImageURL(URL.createObjectURL(response.data));
+                setProfilePictureURL(URL.createObjectURL(response.data));
                 setErrorFlag(false);
                 setErrorMessage('');
             } catch (error) {
@@ -87,12 +90,13 @@ const EditProfile = () => {
     const handleProfilePictureChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files[0]) {
             setProfilePicture(event.target.files[0]);
-            setProfileImageURL(URL.createObjectURL(event.target.files[0]));
+            setProfilePictureURL(URL.createObjectURL(event.target.files[0]));
         }
     };
 
     // Handle show/hide password
-    const handleClickShowPassword = () => setShowPassword((show) => !show);
+    const handleClickShowNewPassword = () => setShowNewPassword((show) => !show);
+    const handleClickShowOldPassword = () => setShowOldPassword((show) => !show);
 
     // Handle form submission
     const handleSubmit = async () => {
@@ -101,8 +105,10 @@ const EditProfile = () => {
                 firstName,
                 lastName,
                 email,
-                ...(password && { password }), // Include password only if it's not empty
+                ...((password || currentPassword) && { password, currentPassword }),
             };
+
+            console.log("Update Request Body:", JSON.stringify(updateRequestBody, null, 2));
 
             // Update user details
             await axios.patch(`http://localhost:3000/api/v1/users/${userId}`, updateRequestBody, {
@@ -142,7 +148,7 @@ const EditProfile = () => {
                     alignItems: 'center',
                 }}
             >
-                <Avatar src={profileImageURL} sx={{ width: 100, height: 100 }} />
+                <Avatar src={profilePictureURL} sx={{ width: 100, height: 100 }} />
 
                 <Typography component="h1" variant="h5" sx={{ mt: 2 }}>
                     Edit Profile
@@ -186,9 +192,8 @@ const EditProfile = () => {
                         <Grid item xs={12}>
                             <TextField
                                 fullWidth
-                                label="Password"
-                                type={showPassword ? 'text' : 'password'}
-                                autoComplete="new-password"
+                                label="New Password"
+                                type={showNewPassword ? 'text' : 'password'}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 InputProps={{
@@ -196,10 +201,10 @@ const EditProfile = () => {
                                         <InputAdornment position="end">
                                             <IconButton
                                                 aria-label="toggle password visibility"
-                                                onClick={handleClickShowPassword}
+                                                onClick={handleClickShowNewPassword}
                                                 edge="end"
                                             >
-                                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                                                {showNewPassword ? <VisibilityOff /> : <Visibility />}
                                             </IconButton>
                                         </InputAdornment>
                                     ),
@@ -208,11 +213,49 @@ const EditProfile = () => {
                         </Grid>
 
                         <Grid item xs={12}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-                                <Avatar src={profileImageURL} sx={{ width: 56, height: 56, mr: 2 }} />
-                                <Button variant="contained" component="label">
+                            <TextField
+                                fullWidth
+                                label="Old Password"
+                                type={showOldPassword ? 'text' : 'password'}
+                                autoComplete="new-password"
+                                value={currentPassword}
+                                onChange={(e) => setCurrentPassword(e.target.value)}
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                aria-label="toggle password visibility"
+                                                onClick={handleClickShowOldPassword}
+                                                edge="end"
+                                            >
+                                                {showOldPassword ? <VisibilityOff /> : <Visibility />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                }}
+                            />
+                        </Grid>
+
+                        {/* Upload Profile Photo */}
+                        <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+
+                                {/* Profile Photo */}
+                                <Avatar
+                                    src={profilePictureURL || ""}
+                                    sx={{ width: 45, height: 45, mr: 2 }}/>
+
+                                {/* Upload Profile Photo */}
+                                <Button
+                                    fullWidth
+                                    variant="outlined"
+                                    component="label"
+                                    startIcon={<CloudUploadIcon />}>
                                     Upload Profile Picture
-                                    <input type="file" hidden onChange={handleProfilePictureChange} />
+                                    <input
+                                        type="file"
+                                        hidden
+                                        onChange={handleProfilePictureChange}/>
                                 </Button>
                             </Box>
                         </Grid>
@@ -223,7 +266,7 @@ const EditProfile = () => {
                     </Button>
                     {errorFlag && (
                         <Typography variant="body2" color="error">
-                            {errorMessage}
+                            There's an error :(
                         </Typography>
                     )}
                 </Box>
