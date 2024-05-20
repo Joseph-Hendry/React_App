@@ -4,7 +4,7 @@ import {useUserStore} from "../../store";
 import {
     Paper,
     Typography,
-    Pagination
+    Pagination, Avatar
 } from '@mui/material';
 
 const Profile = () => {
@@ -12,6 +12,8 @@ const Profile = () => {
     // User information
     const userId = useUserStore((state) => state.userId);
     const userToken = useUserStore((state) => state.userToken);
+    const setUserId = useUserStore((state) => state.setUserId);
+    const setUserToken = useUserStore((state) => state.setUserToken);
 
     // Error flags
     const [errorFlag, setErrorFlag] = React.useState(false);
@@ -20,7 +22,26 @@ const Profile = () => {
     // Form Varibles
     const [user, setUser] = React.useState<User|null>()
 
-    // Get the list of categories
+    // Profile photo
+    const [profileImageURL, setProfileImageURL] = React.useState("https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png");
+
+    // Gets the users profile image
+    React.useEffect(() => {
+        const getPetitionOwnerImg = () => {
+            axios.get(`http://localhost:3000/api/v1/users/${userId}/image`, {responseType: "blob"})
+                .then((response) => {
+                    setErrorFlag(false);
+                    setErrorMessage("");
+                    setProfileImageURL(URL.createObjectURL(response.data));
+                }, (error) => {
+                    setErrorFlag(true);
+                    setErrorMessage(error.toString());
+                });
+        };
+        getPetitionOwnerImg();
+    }, [userId, setUserId]);
+
+    // Get user information
     React.useEffect(() => {
         const getUser = () => {
             axios.get('http://localhost:3000/api/v1/users/' + userId, { headers: { "X-Authorization": userToken }})
@@ -34,10 +55,16 @@ const Profile = () => {
                 });
         };
         getUser();
-    }, [userId, userToken]);
+    }, [userId, setUserId, userToken, setUserToken]);
 
     return (
         <>
+
+            {/* Profile Photo */}
+            <Avatar
+                src={profileImageURL}
+                sx={{ width: 200, height: 200 }}/>
+
             {/* Name */}
             <Typography variant="h4">
                 {user?.firstName + " " + user?.lastName}

@@ -52,7 +52,7 @@ const Appbar = () => {
                 });
         };
         getPetitionOwnerImg();
-    }, [userId]);
+    }, [userId, setUserId]);
 
     // Handles opening menu
     const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
