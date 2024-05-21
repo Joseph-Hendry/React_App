@@ -8,6 +8,7 @@ import {
     Pagination, Avatar
 } from '@mui/material';
 import Link from "@mui/material/Link";
+import Button from "@mui/material/Button";
 
 const Profile = () => {
 
@@ -80,9 +81,13 @@ const Profile = () => {
                 {user?.email}
             </Typography>
 
-            <Link onClick={() => {navigate("/user/profile/edit")}} variant="body2">
+            <Button onClick={() => {navigate("/user/profile/edit")}}>
                 Edit Profile
-            </Link>
+            </Button>
+
+            <Button onClick={() => {navigate("/user/profile/change-password")}}>
+                Change Password
+            </Button>
         </>
     );
 };

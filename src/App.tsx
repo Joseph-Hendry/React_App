@@ -21,6 +21,7 @@ import CreatePetition from "./components/petitions/CreatePetition";
 // Other Routes
 import Layout from "./components/layout/Layout";
 import NotFound from "./components/NotFound";
+import ChangePasswordProfile from "./components/user/ChangePasswordProfile";
 
 function App() {
 
@@ -40,6 +41,7 @@ function App() {
                           {/* User Routes */}
                           <Route path="/user/profile" element={<Profile />} />
                           <Route path="/user/profile/edit" element={<EditProfile />} />
+                          <Route path="/user/profile/change-password" element={<ChangePasswordProfile/>} />
                           <Route path="/user/petitions" element={<PetitionsProfile />} />
 
                           {/* Petition Routes*/}
@@ -55,6 +57,7 @@ function App() {
                           {/* User Routes */}
                           <Route path="/user/profile" element={<Navigate to="/auth/login" />} />
                           <Route path="/user/profile/edit" element={<Navigate to="/auth/login" />} />
+                          <Route path="/user/profile/change-password" element={<Navigate to="/auth/login" />} />
                           <Route path="/user/petitions" element={<Navigate to="/auth/login" />} />
 
                           {/* Petition Routes*/}
