@@ -36,18 +36,34 @@ const MenuProps = {
 };
 
 const EditPetition = () => {
-    const { id } = useParams(); // Get petitionId from route parameters
+
+    // Petition ID
+    const { id } = useParams();
+
+    // Used for navigation
     const navigate = useNavigate();
+
+    // User information
     const userId = useUserStore((state) => state.userId);
     const userToken = useUserStore((state) => state.userToken);
 
+    // Petition Form Values
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [categoryId, setCategoryId] = useState('');
+
+    // Petition Picture
     const [petitionPicture, setPetitionPicture] = useState<File | null>(null);
     const [petitionPictureURL, setPetitionPictureURL] = useState('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
+    const [petitionOriginalPictureURL, setPetitionOriginalPictureURL] = useState('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
+
+    // Support Tiers
+    const [supportTiers, setSupportTiers] = useState([{ supportTierId: -1, title: '', description: '', cost: 0 }]);
+
+    // Categories
     const [categories, setCategories] = useState<Category[] | null>(null);
-    const [supportTiers, setSupportTiers] = useState([{ title: '', description: '', cost: 0 }]);
+
+    // Error Messages
     const [errorFlag, setErrorFlag] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
 
@@ -72,7 +88,6 @@ const EditPetition = () => {
                 setDescription(petition.description);
                 setCategoryId(petition.categoryId.toString());
                 setSupportTiers(petition.supportTiers);
-                setPetitionPictureURL(petition.imageURL || 'https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
             })
             .catch((error) => {
                 setErrorFlag(true);
@@ -80,7 +95,27 @@ const EditPetition = () => {
             });
     }, [id, userToken]);
 
-    // Handle petition picture change
+    // Gets the petition image
+    React.useEffect(() => {
+        const getPetitionImg = () => {
+            axios.get(`http://localhost:3000/api/v1/petitions/${id}/image`, {responseType: "blob"})
+                .then((response) => {
+                    setErrorFlag(false);
+                    setErrorMessage("");
+
+                    // Set picture
+                    const pictureURL = URL.createObjectURL(response.data);
+                    setPetitionOriginalPictureURL(pictureURL);
+                    setPetitionPictureURL(pictureURL);
+                }, (error) => {
+                    setErrorFlag(true);
+                    setErrorMessage(error.toString());
+                });
+        };
+        getPetitionImg();
+    }, [id]);
+
+    // Handle change petition picture
     const handlePetitionPictureChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files[0]) {
             setPetitionPicture(event.target.files[0]);
@@ -88,10 +123,10 @@ const EditPetition = () => {
         }
     };
 
-    // Handle remove profile picture
-    const handleRemove = () => {
+    // Handle remove petition picture
+    const handleRevertPicture = () => {
         setPetitionPicture(null);
-        setPetitionPictureURL('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
+        setPetitionPictureURL(petitionOriginalPictureURL);
     };
 
     // Handles category change
@@ -146,6 +181,16 @@ const EditPetition = () => {
                     "X-Authorization": userToken,
                 },
             });
+
+            // Update profile photo if it exists
+            if (petitionPicture) {
+                await axios.put(`http://localhost:3000/api/v1/petitions/${id}/image`, petitionPicture, {
+                    headers: {
+                        "X-Authorization": userToken,
+                        "Content-Type": petitionPicture.type,
+                    },
+                });
+            }
 
             // Update support tiers
             for (const tier of supportTiers) {
@@ -222,8 +267,8 @@ const EditPetition = () => {
                                 variant="outlined"
                                 color="error"
                                 component="label"
-                                onClick={handleRemove}>
-                                Remove
+                                onClick={handleRevertPicture}>
+                                Revert
                             </Button>
                         </Grid>
 
