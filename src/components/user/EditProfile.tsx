@@ -34,37 +34,33 @@ const EditProfile = () => {
     const [errorMessage, setErrorMessage] = React.useState('');
 
     // Form variables
-    const [user, setUser] = React.useState<User | null>(null);
     const [firstName, setFirstName] = React.useState('');
     const [lastName, setLastName] = React.useState('');
     const [email, setEmail] = React.useState('');
-    const [password, setPassword] = React.useState('');
-    const [currentPassword, setCurrentPassword] = React.useState('');
-    const [showNewPassword, setShowNewPassword] = React.useState(false);
-    const [showOldPassword, setShowOldPassword] = React.useState(false);
 
     // Profile photo
-    const [profilePictureURL, setProfilePictureURL] = React.useState(
-        'https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png'
-    );
     const [profilePicture, setProfilePicture] = React.useState<File | null>(null);
+    const [profilePictureURL, setProfilePictureURL] = React.useState('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
+    const [profilePictureRemoved, setProfilePictureRemoved] = React.useState(false);
 
     // Get user's current information
     React.useEffect(() => {
         const getUser = async () => {
             try {
+                // Send request
                 const response = await axios.get(`http://localhost:3000/api/v1/users/${userId}`, {
                     headers: { 'X-Authorization': userToken },
                 });
-                setUser(response.data);
+
+                // Set variables
                 setFirstName(response.data.firstName);
                 setLastName(response.data.lastName);
                 setEmail(response.data.email);
                 setErrorFlag(false);
                 setErrorMessage('');
+
             } catch (error) {
                 setErrorFlag(true);
-                // setErrorMessage(error.toString());
             }
         };
         getUser();
@@ -74,15 +70,17 @@ const EditProfile = () => {
     React.useEffect(() => {
         const getProfileImage = async () => {
             try {
+                // Send request
                 const response = await axios.get(`http://localhost:3000/api/v1/users/${userId}/image`, {
                     responseType: 'blob',
                 });
+
+                // Set variables
                 setProfilePictureURL(URL.createObjectURL(response.data));
                 setErrorFlag(false);
                 setErrorMessage('');
             } catch (error) {
                 setErrorFlag(true);
-                // setErrorMessage(error.toString());
             }
         };
         getProfileImage();
@@ -90,27 +88,39 @@ const EditProfile = () => {
 
     // Handle profile picture change
     const handleProfilePictureChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        // Add file if valid
         if (event.target.files && event.target.files[0]) {
+            // Set not removed
+            setProfilePictureRemoved(false);
+
+            // Set File
             setProfilePicture(event.target.files[0]);
             setProfilePictureURL(URL.createObjectURL(event.target.files[0]));
         }
     };
 
-    // Handle show/hide password
-    const handleClickShowNewPassword = () => setShowNewPassword((show) => !show);
-    const handleClickShowOldPassword = () => setShowOldPassword((show) => !show);
+    // Handle remove profile picture
+    const handleRemove = () => {
+        setProfilePictureRemoved(true);
+        setProfilePicture(null)
+        setProfilePictureURL('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
+    };
 
-    // Handle form submission
-    const handleSubmit = async () => {
+    // Handle cancel
+    const handleCancel = () => {
+        navigate("/user/profile");
+    }
+
+    // Handle save
+    const handleSave = async () => {
         try {
+
+            // Make request body
             const updateRequestBody = {
                 firstName,
                 lastName,
                 email,
-                ...((password || currentPassword) && { password, currentPassword }),
             };
-
-            console.log("Update Request Body:", JSON.stringify(updateRequestBody, null, 2));
 
             // Update user details
             await axios.patch(`http://localhost:3000/api/v1/users/${userId}`, updateRequestBody, {
@@ -119,7 +129,6 @@ const EditProfile = () => {
 
             // Upload profile photo if selected
             if (profilePicture) {
-
                 await axios.put(`http://localhost:3000/api/v1/users/${userId}/image`, profilePicture, {
                     headers: {
                         'X-Authorization': userToken,
@@ -127,12 +136,18 @@ const EditProfile = () => {
                     },
                 });
 
-                // For running Appbar hook
-                setUserId(userId);
+            // Delete photo if removed
+            } else if (profilePictureRemoved) {
+                await axios.delete(`http://localhost:3000/api/v1/users/${userId}/image`, {
+                    headers: {
+                        'X-Authorization': userToken
+                    }
+                });
             }
 
             // Navigate to profile page
             navigate('/user/profile');
+
         } catch (error) {
             setErrorFlag(true);
             // setErrorMessage(error.toString());
@@ -148,16 +163,50 @@ const EditProfile = () => {
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                }}
-            >
-                <Avatar src={profilePictureURL} sx={{ width: 100, height: 100 }} />
+                }}>
 
+                {/* Edit Profile Title */}
                 <Typography component="h1" variant="h5" sx={{ mt: 2 }}>
                     Edit Profile
                 </Typography>
 
+                {/* Profile Photo */}
+                <Avatar
+                    src={profilePictureURL}
+                    sx={{ width: 100, height: 100, mt:2 }}/>
+
+                {/* Form Grid */}
                 <Box sx={{ mt: 3 }}>
-                    <Grid container spacing={2}>
+                    <Grid container spacing={2} alignItems="baseline">
+
+                        {/* Upload Button */}
+                        <Grid item xs={6} mb={2}>
+                            <Button
+                                fullWidth
+                                variant="outlined"
+                                component="label"
+                                startIcon={<CloudUploadIcon />}>
+                                Upload
+                                <input
+                                    type="file"
+                                    hidden
+                                    onChange={handleProfilePictureChange}/>
+                            </Button>
+                        </Grid>
+
+                        {/* Remove Button */}
+                        <Grid item xs={6} mb={2}>
+                            <Button
+                                fullWidth
+                                variant="outlined"
+                                color="error"
+                                component="label"
+                                onClick={handleRemove}>
+                                Remove
+                            </Button>
+                        </Grid>
+
+                        {/* First Name */}
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 required
@@ -165,10 +214,10 @@ const EditProfile = () => {
                                 label="First Name"
                                 autoComplete="given-name"
                                 value={firstName}
-                                onChange={(e) => setFirstName(e.target.value)}
-                            />
+                                onChange={(e) => setFirstName(e.target.value)}/>
                         </Grid>
 
+                        {/* Last Name */}
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 required
@@ -176,10 +225,10 @@ const EditProfile = () => {
                                 label="Last Name"
                                 autoComplete="family-name"
                                 value={lastName}
-                                onChange={(e) => setLastName(e.target.value)}
-                            />
+                                onChange={(e) => setLastName(e.target.value)}/>
                         </Grid>
 
+                        {/* Email Address */}
                         <Grid item xs={12}>
                             <TextField
                                 required
@@ -187,85 +236,25 @@ const EditProfile = () => {
                                 label="Email Address"
                                 autoComplete="email"
                                 value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                            />
+                                onChange={(e) => setEmail(e.target.value)}/>
                         </Grid>
 
-                        <Grid item xs={12}>
-                            <TextField
-                                fullWidth
-                                label="New Password"
-                                type={showNewPassword ? 'text' : 'password'}
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                InputProps={{
-                                    endAdornment: (
-                                        <InputAdornment position="end">
-                                            <IconButton
-                                                aria-label="toggle password visibility"
-                                                onClick={handleClickShowNewPassword}
-                                                edge="end"
-                                            >
-                                                {showNewPassword ? <VisibilityOff /> : <Visibility />}
-                                            </IconButton>
-                                        </InputAdornment>
-                                    ),
-                                }}
-                            />
+                        {/* Cancel Button */}
+                        <Grid item xs={12} sm={6} mt={1}>
+                            <Button fullWidth variant="outlined" onClick={handleCancel}>
+                                cancel
+                            </Button>
                         </Grid>
 
-                        <Grid item xs={12}>
-                            <TextField
-                                fullWidth
-                                label="Old Password"
-                                type={showOldPassword ? 'text' : 'password'}
-                                autoComplete="new-password"
-                                value={currentPassword}
-                                onChange={(e) => setCurrentPassword(e.target.value)}
-                                InputProps={{
-                                    endAdornment: (
-                                        <InputAdornment position="end">
-                                            <IconButton
-                                                aria-label="toggle password visibility"
-                                                onClick={handleClickShowOldPassword}
-                                                edge="end"
-                                            >
-                                                {showOldPassword ? <VisibilityOff /> : <Visibility />}
-                                            </IconButton>
-                                        </InputAdornment>
-                                    ),
-                                }}
-                            />
-                        </Grid>
-
-                        {/* Upload Profile Photo */}
-                        <Grid item xs={12}>
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-
-                                {/* Profile Photo */}
-                                <Avatar
-                                    src={profilePictureURL || ""}
-                                    sx={{ width: 45, height: 45, mr: 2 }}/>
-
-                                {/* Upload Profile Photo */}
-                                <Button
-                                    fullWidth
-                                    variant="outlined"
-                                    component="label"
-                                    startIcon={<CloudUploadIcon />}>
-                                    Upload Profile Picture
-                                    <input
-                                        type="file"
-                                        hidden
-                                        onChange={handleProfilePictureChange}/>
-                                </Button>
-                            </Box>
+                        {/* Save Button */}
+                        <Grid item xs={12} sm={6} mt={1}>
+                            <Button fullWidth variant="contained" onClick={handleSave}>
+                                Save
+                            </Button>
                         </Grid>
                     </Grid>
 
-                    <Button fullWidth variant="contained" sx={{ mt: 3, mb: 2 }} onClick={handleSubmit}>
-                        Save Changes
-                    </Button>
+                    {/* Error Flag */}
                     {errorFlag && (
                         <Typography variant="body2" color="error">
                             There's an error :(
