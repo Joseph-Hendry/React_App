@@ -89,7 +89,7 @@ const Register = () => {
             }
 
             // Navigate to profile page
-            navigate('/users/profile');
+            navigate('/user/profile');
         } catch (error) {
             setErrorFlag(true);
             setErrorMessage("There was an error :(");

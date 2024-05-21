@@ -1,9 +1,11 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import {usePetitionSearchStore, usePetitionStore, useUserStore} from "../../store";
 import axios from "axios";
 import PetitionCard from "../petitions/PetitionCard";
 import {Pagination, Paper, Typography} from "@mui/material";
 import CSS from "csstype";
+import Button from "@mui/material/Button";
 
 // Constants
 const ITEMS_PER_PAGE: number = 10;
@@ -27,6 +29,9 @@ const titleStyle: CSS.Properties = {
 };
 
 const PetitionsProfile = () => {
+
+    // For navigation
+    const navigate = useNavigate();
 
     // Error flags
     const [errorFlag, setErrorFlag] = React.useState(false);
@@ -107,6 +112,11 @@ const PetitionsProfile = () => {
                 <Typography variant="h4" style={titleStyle}>
                     My Petitions
                 </Typography>
+
+                {/* Create Petition */}
+                <Button onClick={() => {navigate("/petitions/create")}}>
+                    Edit Profile
+                </Button>
 
                 {/* List of cards */}
                 {petition_rows()}

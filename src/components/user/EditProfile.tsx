@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useUserStore } from '../../store';
 import {
@@ -15,7 +16,6 @@ import {
     Grid,
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 
 const EditProfile = () => {

@@ -108,7 +108,7 @@ const Login = () => {
                         Sign In
                     </Button>
 
-                    <Link onClick={() => {navigate("/users/register")}} variant="body2">
+                    <Link onClick={() => {navigate("/auth/register")}} variant="body2">
                         {"Don't have an account? Sign Up"}
                     </Link>
                 </Box>

@@ -54,6 +54,11 @@ const Appbar = () => {
         getPetitionOwnerImg();
     }, [userId, setUserId]);
 
+    // Handles petitions button
+    const handlePetitions = () => {
+        navigate('/petitions');
+    };
+
     // Handles opening menu
     const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorElUser(event.currentTarget);
@@ -100,7 +105,7 @@ const Appbar = () => {
             <Toolbar>
 
                 {/* Title */}
-                <Typography variant="h6" sx={{ display: 'block', marginRight: 5 }}>
+                <Typography onClick={handlePetitions} variant="h6" sx={{ display: 'block', marginRight: 5 }}>
                     Petition Site
                 </Typography>
 

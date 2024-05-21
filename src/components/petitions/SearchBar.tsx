@@ -20,7 +20,7 @@ import {
     Chip
 } from "@mui/material";
 
-// Global Varibles
+// Global Variables
 const INITIAL_PRICE = 50;
 const MAX_PRICE = 100;
 const MIN_PRICE = 0;

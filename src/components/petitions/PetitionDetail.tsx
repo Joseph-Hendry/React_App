@@ -1,20 +1,22 @@
 import * as React from 'react';
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import CSS from 'csstype';
-import {usePetitionStore} from "../../store";
+import {usePetitionStore, useUserStore} from "../../store";
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import GroupsIcon from '@mui/icons-material/Groups';
 import {
-    Avatar,
+    Avatar, Button,
     Card,
     CardMedia,
-    Chip,
+    Chip, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle,
     Paper,
     Typography
 } from '@mui/material';
 import Box from "@mui/material/Box";
 import PetitionCard from "./PetitionCard";
+import {useState} from "react";
+import TextField from "@mui/material/TextField";
 
 // Paper CSS
 const paper: CSS.Properties = {
@@ -35,6 +37,9 @@ const titleStyle: CSS.Properties = {
 };
 
 const PetitionDetail = () => {
+
+    // For navigation
+    const navigate = useNavigate();
 
     // Petition ID
     const { id } = useParams();
@@ -165,7 +170,7 @@ const PetitionDetail = () => {
     }, [petition?.categoryId, petition?.ownerId]);
 
     // Get the support tier cards
-    const support_tier_rows = () => petition?.supportTiers.map((supportTier: SupportTier) => <SupportTierCard key={ supportTier.supportTierId } supportTier={supportTier} />);
+    const support_tier_rows = () => petition?.supportTiers.map((supportTier: SupportTier) => <SupportTierCard key={ supportTier.supportTierId } supportTier={supportTier} petitionId={Number(id)} />);
 
     // Get the petition cards
     const petition_rows = () => petitions?.petitions.map((petition: Petition) => <PetitionCard key={ petition.petitionId } petition={petition} />);
@@ -249,6 +254,14 @@ const PetitionDetail = () => {
                         <Typography variant="body2" maxWidth={300}>
                             {petition?.description}
                         </Typography>
+
+                        {/* Edit Petition */}
+                        <Button
+                            fullWidth
+                            variant="outlined"
+                            onClick={() => navigate(`/petitions/${id}/edit`)}>
+                            Edit
+                        </Button>
                     </Box>
                 </Box>
 
@@ -284,28 +297,85 @@ const PetitionDetail = () => {
 
 // Petition Interface
 interface ISupportTierProps {
+    petitionId: number;
     supportTier: SupportTier;
 }
 
 const SupportTierCard = (props: ISupportTierProps) => {
 
-    // Get Support Tier
-    const { supportTier } = props;
+    // Props
+    const { petitionId, supportTier } = props;
+
+    // Users token
+    const userToken = useUserStore((state) => state.userToken);
+
+    // Form variables
+    const [open, setOpen] = useState(false);
+    const [message, setMessage] = useState('');
+
+    // Handles open dialog
+    const handleClickOpen = () => {
+        setOpen(true);
+    };
+
+    // Handles close dialog
+    const handleClose = () => {
+        setOpen(false);
+    };
+
+    // Supports a petition
+    const supportPetition = () => {
+        axios.post(`http://localhost:3000/api/v1/petitions/${petitionId}/supporters`, { "supportTierId": supportTier.supportTierId, message }, {headers: { "X-Authorization": userToken }})
+            .then((response) => {
+                // Handle success
+                setOpen(false);
+            })
+            .catch((error) => {
+                // Handle error
+                console.error(error.response.statusText);
+            });
+    };
 
     return (
-        <Card >
-            <Typography gutterBottom variant="h5" component="div">
-                {supportTier.title}
-            </Typography>
+        <>
+            <Card onClick={handleClickOpen} style={{ cursor: 'pointer' }}>
+                <Typography gutterBottom variant="h5" component="div">
+                    {supportTier.title}
+                </Typography>
+                <Chip icon={<AttachMoneyIcon />} variant="outlined" label={supportTier?.cost} />
+                <Typography variant="body2" maxWidth={300}>
+                    {supportTier?.description}
+                </Typography>
+            </Card>
 
-            <Chip icon={<AttachMoneyIcon />} variant="outlined" label={supportTier?.cost}/>
-
-            {/* Description Body */}
-            <Typography variant="body2" maxWidth={300}>
-                {supportTier?.description}
-            </Typography>
-        </Card>
-    )
-}
+            <Dialog open={open} onClose={handleClose}>
+                <DialogTitle>Support Petition</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Do you want to support this petition at the {supportTier.title} tier?
+                    </DialogContentText>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        label="Additional Message"
+                        type="text"
+                        fullWidth
+                        variant="outlined"
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose} color="primary">
+                        Cancel
+                    </Button>
+                    <Button onClick={supportPetition} color="primary">
+                        Support
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        </>
+    );
+};
 
 export default PetitionDetail;
