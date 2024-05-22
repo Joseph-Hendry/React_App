@@ -294,7 +294,7 @@ const PetitionDetail = () => {
                         alt="Auction hero"
                     />
 
-                    <Box sx={{ width: "fit-content", marginLeft: 1 }} >
+                    <Box sx={{ marginLeft: 1 }} >
                         {/* Profile Photo & Name Box */}
                         <Box sx={{ flex: "none", display: "flex", justifyContent: "left", marginBottom: 1 }} >
 
@@ -347,7 +347,7 @@ const PetitionDetail = () => {
                         {userId === petition?.ownerId && (
                             <>
                                 <Divider/>
-                                <Box m={3}>
+                                <Box m={3} width={250}>
                                     <Button
                                         fullWidth
                                         variant="outlined"
@@ -355,7 +355,7 @@ const PetitionDetail = () => {
                                         Edit
                                     </Button>
                                 </Box>
-                                <Box m={3}>
+                                <Box m={3} width={250}>
                                     <Button
                                         fullWidth
                                         variant="outlined"

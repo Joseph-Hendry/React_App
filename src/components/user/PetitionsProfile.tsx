@@ -28,6 +28,15 @@ const titleStyle: CSS.Properties = {
     textTransform: "uppercase",
 };
 
+// Button CSS
+const button: CSS.Properties = {
+    margin: "20px",
+    marginTop: "0",
+    fontWeight: "bold",
+    textTransform: "uppercase",
+    width: "100%"
+};
+
 const PetitionsProfile = () => {
 
     // For navigation
@@ -116,8 +125,8 @@ const PetitionsProfile = () => {
                 </Typography>
 
                 {/* Create Petition */}
-                <Button onClick={() => {navigate("/petitions/create")}}>
-                    Edit Profile
+                <Button style={button} onClick={() => {navigate("/petitions/create")}}>
+                    Create Petition
                 </Button>
 
                 {/* List of cards */}
