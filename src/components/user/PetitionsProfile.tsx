@@ -81,7 +81,7 @@ const PetitionsProfile = () => {
                     setErrorFlag(false);
                     setErrorMessage("");
                     setPetitions(response.data);
-                    setPageNum(Math.ceil((petitions?.count ?? 0) / ITEMS_PER_PAGE))
+                    setPageNum(Math.max(1, Math.ceil((response.data?.count || 0) / ITEMS_PER_PAGE)));
                 }, (error) => {
                     setErrorFlag(true);
                     setErrorMessage(error.toString());
