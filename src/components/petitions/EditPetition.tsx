@@ -58,6 +58,7 @@ const EditPetition = () => {
     const [petitionOriginalPictureURL, setPetitionOriginalPictureURL] = useState('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
 
     // Support Tiers
+    const [deletedSupportTierIds, setDeletedSupportTierIds] = useState([-1])
     const [supportTiers, setSupportTiers] = useState([{ supportTierId: -1, title: '', description: '', cost: 0 }]);
 
     // Categories
@@ -123,7 +124,7 @@ const EditPetition = () => {
         }
     };
 
-    // Handle remove petition picture
+    // Handle revert petition picture
     const handleRevertPicture = () => {
         setPetitionPicture(null);
         setPetitionPictureURL(petitionOriginalPictureURL);
@@ -145,15 +146,22 @@ const EditPetition = () => {
         setSupportTiers(updatedTiers);
     };
 
-    // Handle adding a new support tier
+    // Handle adding a new support tiers
     const handleAddSupportTier = () => {
         if (supportTiers.length < 3) {
-            setSupportTiers([...supportTiers, { title: '', description: '', cost: 0 }]);
+            setSupportTiers([...supportTiers, { supportTierId: -1, title: '', description: '', cost: 0 }]);
         }
     };
 
     // Handle removing a support tier
     const handleRemoveSupportTier = (index: number) => {
+        // Add to deleted if it was existing support tier
+        const tier = supportTiers[index];
+        if (tier.supportTierId !== -1) {
+            setDeletedSupportTierIds([...deletedSupportTierIds, tier.supportTierId]);
+        }
+
+        // Remove from petitions list
         if (supportTiers.length > 1) {
             const updatedTiers = supportTiers.filter((_, i) => i !== index);
             setSupportTiers(updatedTiers);
@@ -167,16 +175,17 @@ const EditPetition = () => {
 
     // Handle update
     const handleUpdate = async () => {
-        const updateRequestBody = {
+        // Create request body
+        const updatePetitionRequestBody = {
             title,
             description,
             categoryId: Number(categoryId)
         };
-        console.log(JSON.stringify(updateRequestBody, null, 2));
+        console.log(JSON.stringify(updatePetitionRequestBody, null, 2));
 
         try {
             // Update petition details
-            await axios.patch(`http://localhost:3000/api/v1/petitions/${id}`, updateRequestBody, {
+            await axios.patch(`http://localhost:3000/api/v1/petitions/${id}`, updatePetitionRequestBody, {
                 headers: {
                     "X-Authorization": userToken,
                 },
@@ -192,30 +201,46 @@ const EditPetition = () => {
                 });
             }
 
-            // Update support tiers
-            for (const tier of supportTiers) {
-                const { id, ...tierData } = tier;
-                await axios.patch(`http://localhost:3000/api/v1/petitions/${petitionId}/supportTiers/${id}`, tierData, {
-                    headers: {
-                        "X-Authorization": userToken,
-                    },
-                });
+            // Delete removed support tiers
+            for (const supportTierId of deletedSupportTierIds) {
+                // eslint-disable-next-line eqeqeq
+                if (supportTierId != -1) {
+                    await axios.delete(`http://localhost:3000/api/v1/petitions/${id}/supportTiers/${supportTierId}`,  {
+                        headers: {
+                            "X-Authorization": userToken,
+                        },
+                    });
+                }
             }
 
-            // Upload profile photo if it exists
-            if (petitionPicture) {
-                await axios.put(`http://localhost:3000/api/v1/petitions/${petitionId}/image`, petitionPicture, {
-                    headers: {
-                        "X-Authorization": userToken,
-                        "Content-Type": petitionPicture.type,
-                    },
-                });
+            // Update & Create new support tiers
+            for (const supportTier of supportTiers) {
+
+                // Get support tier info
+                const { supportTierId, ...supportTierData } = supportTier;
+
+                // Check for put or patch
+                if (supportTierId === -1) {
+                    await axios.put(`http://localhost:3000/api/v1/petitions/${id}/supportTiers`, supportTierData, {
+                        headers: {
+                            "X-Authorization": userToken,
+                        },
+                    });
+                } else {
+                    await axios.patch(`http://localhost:3000/api/v1/petitions/${id}/supportTiers/${supportTierId}`, supportTierData, {
+                        headers: {
+                            "X-Authorization": userToken,
+                        },
+                    });
+                }
             }
 
+            // Navigate to users petitions
             navigate("/user/petitions");
+
         } catch (error) {
             setErrorFlag(true);
-            // setErrorMessage(error.toString());
+            setErrorMessage("Error :(");
         }
     };
 
