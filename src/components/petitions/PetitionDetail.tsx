@@ -5,6 +5,7 @@ import CSS from 'csstype';
 import { useUserStore } from "../../store";
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import GroupsIcon from '@mui/icons-material/Groups';
+import HandshakeIcon from '@mui/icons-material/Handshake';
 import {
     Avatar, Button,
     Card,
@@ -325,7 +326,7 @@ const PetitionDetail = () => {
 
                         {/* Funds Raised Chip */}
                         <Box sx={{ marginBottom: 1 }}>
-                            <Chip icon={<AttachMoneyIcon />} variant="outlined" label={petition?.moneyRaised} sx={{ minWidth: 100, justifyContent: "left" }} />
+                            <Chip icon={<HandshakeIcon />} variant="outlined" label={"  $" + petition?.moneyRaised} sx={{ minWidth: 100, justifyContent: "left" }} />
                         </Box>
 
                         {/* Supporters Chip */}

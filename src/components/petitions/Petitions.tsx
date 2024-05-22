@@ -42,6 +42,7 @@ const Petitions = () => {
     // Petitions
     const [petitions, setPetitions] = React.useState<Petitions | null>();
     const petitionSearch = usePetitionSearchStore((state) => state.petitionSearch)
+    const setPetitionSearch = usePetitionSearchStore((state) => state.setPetitionSearch)
 
     // Categories
     const [categories, setCategories] = React.useState<Category[] | null>(null);
@@ -81,7 +82,7 @@ const Petitions = () => {
         if (page > pageNum) {
             setPage(pageNum);
         }
-    }, [page, pageNum, petitionSearch, petitions?.count, setPetitions]);
+    }, [page, pageNum, petitionSearch, petitions?.count, setPetitions, setPetitionSearch]);
 
     // Get the list of categories
     React.useEffect(() => {
