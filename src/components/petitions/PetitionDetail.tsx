@@ -9,22 +9,33 @@ import {
     Avatar, Button,
     Card,
     CardMedia,
-    Chip, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle,
+    Chip,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Grid,
     Paper,
     Typography
 } from '@mui/material';
 import Box from "@mui/material/Box";
 import PetitionCard from "./PetitionCard";
-import {useState} from "react";
 import TextField from "@mui/material/TextField";
+
+// Background Paper CSS
+const paperBackground: CSS.Properties = {
+    padding: "10px",
+    margin: "20px",
+    maxWidth: "965px",
+    minWidth: "320px",
+    width: "fit-content",
+    display: "inline-block"
+};
 
 // Paper CSS
 const paper: CSS.Properties = {
     padding: "10px",
-    margin: "20px",
-    width: "fit-content",
-    maxWidth: "965px",
-    minWidth: "320",
+    width: "98.5%",
     display: "inline-block"
 };
 
@@ -44,9 +55,13 @@ const PetitionDetail = () => {
     // Petition ID
     const { id } = useParams();
 
+    // User information
+    const userId = useUserStore((state) => state.userId);
+    const userToken = useUserStore((state) => state.userToken);
+
     // Petitions
-    const [petition, setPetition] = React.useState<PetitionFull>()
-    const [petitions, setPetitions] = React.useState<Petitions>()
+    const [petition, setPetition] = React.useState<PetitionFull>();
+    const [petitions, setPetitions] = React.useState<Petitions>();
 
     // Images
     const [petitionImageURL, setPetitionImageURL] = React.useState("https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png");
@@ -55,6 +70,11 @@ const PetitionDetail = () => {
     // Categories
     const [categoryName, setCategoryName] = React.useState("");
     const [categories, setCategories] = React.useState<Category[] | null>(null);
+
+    // Support Petition
+    const [selectedSupportTierId, setSelectedSupportTierId] = React.useState(-1);
+    const [open, setOpen] = React.useState(false);
+    const [message, setMessage] = React.useState('');
 
     // Error flags
     const [errorFlag, setErrorFlag] = React.useState(false);
@@ -144,35 +164,101 @@ const PetitionDetail = () => {
     // Get the list of similar petitions
     React.useEffect(() => {
 
-        // Set pagination variables
-        const petitionSearch: PetitionSearch = {
+        // Set search params
+        const categorySearch = {
             startIndex: 0,
-            categoryIds: [Number(petition?.categoryId)],
-            // ownerId: petition?.ownerId,
+            categoryIds: [String(petition?.categoryId)],
             sortBy: "CREATED_ASC",
-            count: 2
+            // count: 2
+        }
+        const ownerSearch = {
+            startIndex: 0,
+            ownerId: String(petition?.ownerId),
+            sortBy: "CREATED_ASC",
+            // count: 2
         }
 
-        // Send request
-        const getPetitionsCat = () => {
-            axios.get('http://localhost:3000/api/v1/petitions', {params: petitionSearch})
-                .then((response) => {
-                    setErrorFlag(false);
-                    setErrorMessage("");
-                    setPetitions(response.data);
-                }, (error) => {
-                    setErrorFlag(true);
-                    setErrorMessage(error.toString());
-                });
-        };
-        getPetitionsCat();
-    }, [petition?.categoryId, petition?.ownerId]);
+        // Console log for categorySearch
+        console.log("Category Search:", JSON.stringify(categorySearch, null, 2));
 
-    // Get the support tier cards
-    const support_tier_rows = () => petition?.supportTiers.map((supportTier: SupportTier) => <SupportTierCard key={ supportTier.supportTierId } supportTier={supportTier} petitionId={Number(id)} />);
+        // Console log for ownerSearch
+        console.log("Owner Search:", JSON.stringify(ownerSearch, null, 2));
+
+        // Send request
+        const getPetitions = async () => {
+            try {
+                // Get category petitions
+                const categoryResponse = await axios.get('http://localhost:3000/api/v1/petitions', {params: categorySearch});
+                const categoryPetitions: Petitions = categoryResponse.data;
+
+                // Get owner petitions
+                const ownerResponse = await axios.get('http://localhost:3000/api/v1/petitions', {params: ownerSearch});
+                const ownerPetitions: Petitions = ownerResponse.data;
+
+                // Add petitions together
+                const combinedPetitions = categoryPetitions.petitions.concat(ownerPetitions.petitions);
+
+                // Use a Set to keep track of unique petition IDs
+                const uniquePetitionIds = new Set();
+
+                // Make unique
+                const uniquePetitions = combinedPetitions.filter(petition => {
+                    const isDuplicate = uniquePetitionIds.has(petition.petitionId);
+                    uniquePetitionIds.add(petition.petitionId);
+                    return !isDuplicate;
+                });
+
+                // Remove current petition
+                const similarPetitions = uniquePetitions.filter(petitionS => petitionS.petitionId !== petition?.petitionId);
+
+                // Transform
+                const similarPetitionsC: Petitions = {petitions: similarPetitions, count: similarPetitions.length}
+
+                console.log("Similar Petitions: ", JSON.stringify(similarPetitionsC, null, 2));
+
+                // Set petitions
+                setPetitions(similarPetitionsC);
+
+            } catch (error) {
+                setErrorFlag(true);
+                // @ts-ignore
+                console.error(error);
+                // console.error(error.response.statusText);
+            }
+        };
+        getPetitions();
+    }, [petition?.categoryId, petition?.ownerId, petition?.petitionId]);
+
+    // Supports a petition
+    const supportPetition = () => {
+        axios.post(`http://localhost:3000/api/v1/petitions/${id}/supporters`, { "supportTierId": selectedSupportTierId, message }, {headers: { "X-Authorization": userToken }})
+            .then((response) => {
+                // Handle success
+                setOpen(false);
+            })
+            .catch((error) => {
+                // Handle error
+                console.error(error.response.statusText);
+            });
+    };
+
+    // Handles open dialog
+    const handleOpenSupport = (supportTierId: number) => {
+        setSelectedSupportTierId(supportTierId);
+        setOpen(true);
+    };
+
+    // Handles close dialog
+    const handleCloseSupport = () => {
+        setOpen(false);
+    };
 
     // Get the petition cards
-    const petition_rows = () => petitions?.petitions.map((petition: Petition) => <PetitionCard key={ petition.petitionId } petition={petition} categories={categories} />);
+    const petition_rows = () => petitions?.petitions.map((petition: Petition) => (
+        <Box key={petition.petitionId} sx={{ minWidth: 300, marginRight: 2 }}>
+            <PetitionCard petition={petition} categories={categories} />
+        </Box>
+    ));
 
     // Format the date
     let formattedDate = "'N/A";
@@ -188,7 +274,7 @@ const PetitionDetail = () => {
     return (
         <>
             {/* Paper for cards */}
-            <Paper elevation={24} style={paper}>
+            <Paper elevation={24} style={paperBackground}>
 
                 {/* Title */}
                 <Typography variant="h4" style={titleStyle}>
@@ -196,16 +282,16 @@ const PetitionDetail = () => {
                 </Typography>
 
                 {/* Hero Image */}
-                <Box sx={{ display: 'flex', textAlign: 'left'}}>
+                <Box sx={{ width: "100%", display: 'flex', textAlign: 'left'}}>
                     {/* Left side with the image */}
                     <CardMedia
                         component="img"
-                        sx={{ width: 300 }}
+                        sx={{ width: 450 }}
                         image={petitionImageURL}
                         alt="Auction hero"
                     />
 
-                    <Box sx={{ marginLeft: 1}} >
+                    <Box sx={{ width: "fit-content", marginLeft: 1 }} >
                         {/* Profile Photo & Name Box */}
                         <Box sx={{ flex: "none", display: "flex", justifyContent: "left", marginBottom: 1 }} >
 
@@ -255,108 +341,70 @@ const PetitionDetail = () => {
                         </Typography>
 
                         {/* Edit Petition */}
-                        <Button
-                            fullWidth
-                            variant="outlined"
-                            onClick={() => navigate(`/petitions/${id}/edit`)}>
-                            Edit
-                        </Button>
+                        {userId === petition?.ownerId && (
+                            <Button
+                                fullWidth
+                                variant="outlined"
+                                onClick={() => navigate(`/petitions/${id}/edit`)}>
+                                Edit
+                            </Button>
+                        )}
                     </Box>
                 </Box>
 
                 {/* Content Below Box */}
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: 'fit-content', margin: 2 }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: '100%' }}>
 
                     {/* Support Tiers Title */}
-                    <Typography variant="h6">
-                        Support Tiers
+                    <Typography variant="h5" style={titleStyle}>
+                        Support Tiers (Click to Support)
                     </Typography>
 
-                    {/* Scrollable box */}
-                    <Paper sx={{ display: 'flex', width: "700px", gap: 2, overflowX: 'auto' }}>
-                        {/* List of cards */}
-                        {support_tier_rows()}
-                    </Paper>
+                    {/* Grid of Support Tiers */}
+                    <Grid container spacing={3}>
+                        {petition?.supportTiers.map((supportTier, index) => (
+                            <React.Fragment key={index} >
+                                <Grid item xs={4} textAlign={"left"} onClick={() => handleOpenSupport(supportTier.supportTierId)}>
+                                    <Card>
+                                        {/* Title */}
+                                        <Typography gutterBottom variant="h5" m={1}>
+                                            {supportTier.title}
+                                        </Typography>
+
+                                        {/* Cost Chip*/}
+                                        <Chip icon={<AttachMoneyIcon />}  variant="outlined" label={supportTier?.cost} />
+
+                                        {/* Description */}
+                                        <Typography variant="body2" maxWidth={300} m={1}>
+                                            {supportTier?.description}
+                                        </Typography>
+                                    </Card>
+                                </Grid>
+                            </React.Fragment>
+                        ))}
+                    </Grid>
 
                     {/* Similar Petitions Title */}
-                    <Typography variant="h6">
+                    <Typography variant="h5" style={titleStyle}>
                         Similar Petitions
                     </Typography>
 
                     {/* Scrollable box */}
-                    <Paper sx={{ display: 'flex', width: "700px", gap: 2, overflowX: 'auto' }}>
+                    <Box sx={{ display: 'flex', overflowX: 'auto', width: '100%' }}>
                         {/* List of cards */}
                         {petition_rows()}
-                    </Paper>
+                    </Box>
                 </Box>
             </Paper>
-        </>
-    )
-}
 
-// Petition Interface
-interface ISupportTierProps {
-    petitionId: number;
-    supportTier: SupportTier;
-}
-
-const SupportTierCard = (props: ISupportTierProps) => {
-
-    // Props
-    const { petitionId, supportTier } = props;
-
-    // Users token
-    const userToken = useUserStore((state) => state.userToken);
-
-    // Form variables
-    const [open, setOpen] = useState(false);
-    const [message, setMessage] = useState('');
-
-    // Handles open dialog
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
-
-    // Handles close dialog
-    const handleClose = () => {
-        setOpen(false);
-    };
-
-    // Supports a petition
-    const supportPetition = () => {
-        axios.post(`http://localhost:3000/api/v1/petitions/${petitionId}/supporters`, { "supportTierId": supportTier.supportTierId, message }, {headers: { "X-Authorization": userToken }})
-            .then((response) => {
-                // Handle success
-                setOpen(false);
-            })
-            .catch((error) => {
-                // Handle error
-                console.error(error.response.statusText);
-            });
-    };
-
-    return (
-        <>
-            <Card onClick={handleClickOpen} style={{ cursor: 'pointer' }}>
-                <Typography gutterBottom variant="h5" component="div">
-                    {supportTier.title}
-                </Typography>
-                <Chip icon={<AttachMoneyIcon />} variant="outlined" label={supportTier?.cost} />
-                <Typography variant="body2" maxWidth={300}>
-                    {supportTier?.description}
-                </Typography>
-            </Card>
-
-            <Dialog open={open} onClose={handleClose}>
+            {/* Dialog Box */}
+            <Dialog open={open} onClose={handleCloseSupport}>
                 <DialogTitle>Support Petition</DialogTitle>
                 <DialogContent>
-                    <DialogContentText>
-                        Do you want to support this petition at the {supportTier.title} tier?
-                    </DialogContentText>
                     <TextField
                         autoFocus
                         margin="dense"
-                        label="Additional Message"
+                        label="Optional Message"
                         type="text"
                         fullWidth
                         variant="outlined"
@@ -365,7 +413,7 @@ const SupportTierCard = (props: ISupportTierProps) => {
                     />
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleClose} color="primary">
+                    <Button onClick={handleCloseSupport} color="error">
                         Cancel
                     </Button>
                     <Button onClick={supportPetition} color="primary">
@@ -374,7 +422,7 @@ const SupportTierCard = (props: ISupportTierProps) => {
                 </DialogActions>
             </Dialog>
         </>
-    );
-};
+    )
+}
 
 export default PetitionDetail;

@@ -20,7 +20,7 @@ import {
     FormControl,
     Card,
     CardContent,
-    CardHeader
+    CardHeader, Paper
 } from '@mui/material';
 
 // Global Variables
@@ -44,7 +44,6 @@ const EditPetition = () => {
     const navigate = useNavigate();
 
     // User information
-    const userId = useUserStore((state) => state.userId);
     const userToken = useUserStore((state) => state.userToken);
 
     // Petition Form Values
@@ -344,8 +343,7 @@ const EditPetition = () => {
                     </Grid>
 
                     {/* Support Tiers */}
-                    <Card sx={{ mt: 3 }}>
-                        <CardHeader title="Support Tiers" />
+                    <Paper sx={{ mt: 3 }} elevation={6}>
                         <CardContent>
                             <Grid container spacing={2}>
                                 {supportTiers.map((tier, index) => (
@@ -414,7 +412,7 @@ const EditPetition = () => {
                                 )}
                             </Grid>
                         </CardContent>
-                    </Card>
+                    </Paper>
 
                     {/* Container for Cancel & Submit */}
                     <Grid container spacing={2} mt={3} mb={10}>
