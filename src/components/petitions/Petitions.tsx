@@ -4,9 +4,6 @@ import SearchBar from "./SearchBar";
 import axios from "axios";
 import CSS from 'csstype';
 import {
-    usePetitionSearchStore
-} from "../../store";
-import {
     Paper,
     Typography,
     Pagination
@@ -41,8 +38,7 @@ const Petitions = () => {
 
     // Petitions
     const [petitions, setPetitions] = React.useState<Petitions | null>();
-    const petitionSearch = usePetitionSearchStore((state) => state.petitionSearch)
-    const setPetitionSearch = usePetitionSearchStore((state) => state.setPetitionSearch)
+    const [petitionSearch, setPetitionSearch] = React.useState<PetitionSearch>({startIndex: 1, count: ITEMS_PER_PAGE});
 
     // Categories
     const [categories, setCategories] = React.useState<Category[] | null>(null);
@@ -82,7 +78,7 @@ const Petitions = () => {
         if (page > pageNum) {
             setPage(pageNum);
         }
-    }, [page, pageNum, petitionSearch, petitions?.count, setPetitions, setPetitionSearch]);
+    }, [page, pageNum, petitionSearch, petitions?.count]);
 
     // Get the list of categories
     React.useEffect(() => {
@@ -106,7 +102,7 @@ const Petitions = () => {
     return (
         <>
             {/* Search Bar */}
-            <SearchBar/>
+            <SearchBar setPetitionSearch={setPetitionSearch}/>
 
             {/* Paper for cards */}
             <Paper elevation={24} style={paper}>

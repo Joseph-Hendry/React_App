@@ -5,7 +5,6 @@ import { SelectChangeEvent } from '@mui/material/Select';
 import {
     Box,
     Button,
-    Divider,
     Drawer,
     List,
     ListItem,
@@ -20,6 +19,11 @@ import {
     OutlinedInput,
     Chip
 } from "@mui/material";
+
+// Petition Interface
+interface ISearchProps {
+    setPetitionSearch:  React.Dispatch<React.SetStateAction<PetitionSearch>>
+}
 
 // Global Variables
 const INITIAL_PRICE = 50;
@@ -76,16 +80,16 @@ const marks = [
     },
 ];
 
-const SearchBar = () => {
+const SearchBar = (props: ISearchProps) => {
+
+    // Get set search
+    const { setPetitionSearch } = props;
 
     // Form variables
     const [search, setSearch] = React.useState('')
     const [categoriesSelectedIds, setCategoriesSelectedIds] = React.useState<string[]>([]);
     const [price, setPrice] = React.useState(INITIAL_PRICE);
     const [sortOptionSelected, setSortOptionSelected] = React.useState('CREATED_ASC')
-
-    // Get stored variables
-    const setPetitionSearch = usePetitionSearchStore((state) => state.setPetitionSearch)
 
     // Categories
     const [categories, setCategories] = React.useState<Category[] | null>(null);
@@ -200,7 +204,7 @@ const SearchBar = () => {
                                 )}
                                 MenuProps={MenuProps}>
 
-                                {categories?.map((category, index) => (
+                                {categories?.map((category) => (
                                     <MenuItem key={category.categoryId} value={category.categoryId.toString()} >
                                         {category.name}
                                     </MenuItem>
