@@ -369,6 +369,7 @@ const EditPetition = () => {
                                                 required
                                                 fullWidth
                                                 label="Cost"
+                                                type="number"
                                                 value={tier.cost}
                                                 onChange={(e) => handleSupportTierChange(index, 'cost', e.target.value)} />
                                         </Grid>
