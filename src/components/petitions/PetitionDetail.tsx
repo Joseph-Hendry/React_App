@@ -13,7 +13,7 @@ import {
     Dialog,
     DialogActions,
     DialogContent,
-    DialogTitle,
+    DialogTitle, Divider,
     Grid,
     Paper,
     Typography
@@ -26,16 +26,7 @@ import TextField from "@mui/material/TextField";
 const paperBackground: CSS.Properties = {
     padding: "10px",
     margin: "20px",
-    maxWidth: "965px",
-    minWidth: "320px",
-    width: "fit-content",
-    display: "inline-block"
-};
-
-// Paper CSS
-const paper: CSS.Properties = {
-    padding: "10px",
-    width: "98.5%",
+    width: "800px",
     display: "inline-block"
 };
 
@@ -251,6 +242,20 @@ const PetitionDetail = () => {
         setOpen(false);
     };
 
+    // Handles delete petition
+    const handleDelete = () => {
+        axios.delete(`http://localhost:3000/api/v1/petitions/${id}`, {headers: { "X-Authorization": userToken }})
+            .then((response) => {
+                // Handle success
+                setOpen(false);
+                navigate("/user/petitions")
+            })
+            .catch((error) => {
+                // Handle error
+                console.error(error.response.statusText);
+            });
+    }
+
     // Get the petition cards
     const petition_rows = () => petitions?.petitions.map((petition: Petition) => (
         <Box key={petition.petitionId} sx={{ minWidth: 300, marginRight: 2 }}>
@@ -334,18 +339,32 @@ const PetitionDetail = () => {
                         </Typography>
 
                         {/* Description Body */}
-                        <Typography variant="body2" maxWidth={300}>
+                        <Typography variant="body2" maxWidth={300} mb={3}>
                             {petition?.description}
                         </Typography>
 
                         {/* Edit Petition */}
                         {userId === petition?.ownerId && (
-                            <Button
-                                fullWidth
-                                variant="outlined"
-                                onClick={() => navigate(`/petitions/${id}/edit`)}>
-                                Edit
-                            </Button>
+                            <>
+                                <Divider/>
+                                <Box m={3}>
+                                    <Button
+                                        fullWidth
+                                        variant="outlined"
+                                        onClick={() => navigate(`/petitions/${id}/edit`)}>
+                                        Edit
+                                    </Button>
+                                </Box>
+                                <Box m={3}>
+                                    <Button
+                                        fullWidth
+                                        variant="outlined"
+                                        color="error"
+                                        onClick={handleDelete}>
+                                        Delete
+                                    </Button>
+                                </Box>
+                            </>
                         )}
                     </Box>
                 </Box>
