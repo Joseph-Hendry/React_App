@@ -1,6 +1,5 @@
 import * as React from "react";
 import axios from "axios";
-import {usePetitionSearchStore} from "../../store";
 import { SelectChangeEvent } from '@mui/material/Select';
 import {
     Box,
@@ -148,7 +147,7 @@ const SearchBar = (props: ISearchProps) => {
             categoryIds: categoriesSelectedIds.length > 0 ? categoriesSelectedIds.map(Number): undefined,
             supportingCost: price !== 100 ? price + 1: undefined,
             sortBy: sortOptionSelected
-        })
+        });
     }
 
     return (

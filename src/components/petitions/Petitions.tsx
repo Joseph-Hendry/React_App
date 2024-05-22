@@ -56,17 +56,17 @@ const Petitions = () => {
     React.useEffect(() => {
 
         // Set pagination variables
-        petitionSearch.startIndex = (page - 1) * ITEMS_PER_PAGE;
+        petitionSearch.startIndex = page * ITEMS_PER_PAGE;
         petitionSearch.count = ITEMS_PER_PAGE;
 
         // Send request
         const getPetitions = () => {
-            axios.get('http://localhost:3000/api/v1/petitions', {params: petitionSearch})
+            axios.get('http://localhost:3000/api/v1/petitions', { params: petitionSearch })
                 .then((response) => {
                     setErrorFlag(false);
                     setErrorMessage("");
                     setPetitions(response.data);
-                    setPageNum(Math.ceil((petitions?.count ?? 0) / ITEMS_PER_PAGE))
+                    setPageNum(Math.ceil((response.data?.count || 0) / ITEMS_PER_PAGE));
                 }, (error) => {
                     setErrorFlag(true);
                     setErrorMessage(error.toString());
@@ -78,7 +78,7 @@ const Petitions = () => {
         if (page > pageNum) {
             setPage(pageNum);
         }
-    }, [page, pageNum, petitionSearch, petitions?.count]);
+    }, [page, pageNum, petitionSearch]);
 
     // Get the list of categories
     React.useEffect(() => {

@@ -8,11 +8,6 @@ type UserStore = {
     setUserToken: (token: string | null) => void;
 }
 
-interface PetitonSearchI {
-    petitionSearch: PetitionSearch;
-    setPetitionSearch: (petitionSearch: PetitionSearch) => void;
-}
-
 const getLocalStorage = (key: string): UserStore => JSON.parse(window.localStorage.getItem(key) as string) || { userId: -1, userToken: '' };
 const setLocalStorage = (key: string, value: UserStore) => window.localStorage.setItem(key, JSON.stringify(value));
 
@@ -45,9 +40,4 @@ const useUserStore = create<UserStore>((set) => ({
     }),
 }));
 
-const usePetitionSearchStore = create<PetitonSearchI>((set) => ({
-    petitionSearch: { startIndex: 0, sortBy: "CREATED_ASC" },
-    setPetitionSearch: (newSearch) => set({ petitionSearch: newSearch })
-}));
-
-export { useUserStore, usePetitionSearchStore };
+export { useUserStore };
