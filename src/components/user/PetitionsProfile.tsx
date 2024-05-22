@@ -67,33 +67,65 @@ const PetitionsProfile = () => {
     // Get the list of petitions
     React.useEffect(() => {
 
-        // Set pagination variables
-        const petitionSearch: PetitionSearch = {
-            startIndex : (page - 1) * ITEMS_PER_PAGE,
-            count : ITEMS_PER_PAGE,
-            ownerId : userId,
+        // Set search conditions
+        const ownerSearch: PetitionSearch = {
+            startIndex: (page - 1) * ITEMS_PER_PAGE,
+            // count: ITEMS_PER_PAGE,
+            ownerId: userId,
+        }
+
+        const supporterSearch: PetitionSearch = {
+            startIndex: (page - 1) * ITEMS_PER_PAGE,
+            // count: ITEMS_PER_PAGE,
+            supporterId: userId,
         }
 
         // Send request
-        const getPetitions = () => {
-            axios.get('http://localhost:3000/api/v1/petitions', {params: petitionSearch})
-                .then((response) => {
-                    setErrorFlag(false);
-                    setErrorMessage("");
-                    setPetitions(response.data);
-                    setPageNum(Math.max(1, Math.ceil((response.data?.count || 0) / ITEMS_PER_PAGE)));
-                }, (error) => {
-                    setErrorFlag(true);
-                    setErrorMessage(error.toString());
-                });
-        };
-        getPetitions();
+        const getPetitions = async () => {
+            try {
+                // Get owner petitions
+                const ownerResponse = await axios.get('http://localhost:3000/api/v1/petitions', {params: ownerSearch});
+                const ownerPetitions: Petitions = ownerResponse.data;
 
-        // Check page number
-        if (page > pageNum) {
-            setPage(pageNum);
+                // Get supporting petitions
+                const supportResponse = await axios.get('http://localhost:3000/api/v1/petitions', {params: supporterSearch});
+                const supportPetitions: Petitions = supportResponse.data;
+
+                // Add petitions together
+                const combinedPetitions = ownerPetitions.petitions.concat(supportPetitions.petitions);
+
+                // Use a Set to keep track of unique petition IDs
+                const uniquePetitionIds = new Set();
+
+                // Make unique
+                const uniquePetitions = combinedPetitions.filter(petition => {
+                    const isDuplicate = uniquePetitionIds.has(petition.petitionId);
+                    uniquePetitionIds.add(petition.petitionId);
+                    return !isDuplicate;
+                });
+
+                // Transform
+                const similarPetitions: Petitions = {petitions: uniquePetitions, count: uniquePetitions.length}
+
+                // Set petitions
+                setPetitions(similarPetitions);
+
+                // Set page numbers
+                setPageNum(Math.max(1, Math.ceil((uniquePetitions.length || 0) / ITEMS_PER_PAGE)));
+
+                // Check page number
+                if (page > pageNum) {
+                    setPage(pageNum);
+                }
+
+            } catch (error) {
+                setErrorFlag(true);
+                // @ts-ignore
+                // console.error(error.response.statusText);
+            }
         }
-    }, [page, pageNum, petitions?.count, setPetitions, userId]);
+        getPetitions();
+    }, [page, pageNum, userId]);
 
     // Get the list of categories
     React.useEffect(() => {

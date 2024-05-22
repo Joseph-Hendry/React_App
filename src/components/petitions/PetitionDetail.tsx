@@ -168,12 +168,6 @@ const PetitionDetail = () => {
             sortBy: "CREATED_ASC",
         }
 
-        // Console log for categorySearch
-        console.log("Category Search:", JSON.stringify(categorySearch, null, 2));
-
-        // Console log for ownerSearch
-        console.log("Owner Search:", JSON.stringify(ownerSearch, null, 2));
-
         // Send request
         const getPetitions = async () => {
             try {
@@ -204,15 +198,12 @@ const PetitionDetail = () => {
                 // Transform
                 const similarPetitionsC: Petitions = {petitions: similarPetitions, count: similarPetitions.length}
 
-                console.log("Similar Petitions: ", JSON.stringify(similarPetitionsC, null, 2));
-
                 // Set petitions
                 setPetitions(similarPetitionsC);
 
             } catch (error) {
                 setErrorFlag(true);
                 // @ts-ignore
-                console.error(error);
                 // console.error(error.response.statusText);
             }
         };
@@ -222,7 +213,7 @@ const PetitionDetail = () => {
     // Supports a petition
     const supportPetition = () => {
         axios.post(`http://localhost:3000/api/v1/petitions/${id}/supporters`, { "supportTierId": selectedSupportTierId, message }, {headers: { "X-Authorization": userToken }})
-            .then((response) => {
+            .then(() => {
                 // Handle success
                 setOpen(false);
             })
@@ -246,7 +237,7 @@ const PetitionDetail = () => {
     // Handles delete petition
     const handleDelete = () => {
         axios.delete(`http://localhost:3000/api/v1/petitions/${id}`, {headers: { "X-Authorization": userToken }})
-            .then((response) => {
+            .then(() => {
                 // Handle success
                 setOpen(false);
                 navigate("/user/petitions")
