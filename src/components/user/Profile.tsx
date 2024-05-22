@@ -3,35 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 import { useUserStore } from "../../store";
 import {
-    Paper,
     Typography,
     Avatar,
     Button,
     Box, CssBaseline, Grid, TextField, Container
 } from '@mui/material';
-import CSS from 'csstype';
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-
-// Profile Paper CSS
-const profilePaper: CSS.Properties = {
-    padding: "20px",
-    margin: "20px",
-    maxWidth: "600px",
-    width: "100%",
-    textAlign: "center",
-    display: "inline-block",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: "20px"
-};
-
-// Title CSS
-const titleStyle: CSS.Properties = {
-    margin: "10px",
-    color: "#333",
-    fontWeight: "bold",
-    textTransform: "uppercase",
-};
 
 const Profile = () => {
 
