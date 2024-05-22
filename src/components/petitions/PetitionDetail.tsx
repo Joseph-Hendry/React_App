@@ -169,13 +169,11 @@ const PetitionDetail = () => {
             startIndex: 0,
             categoryIds: [String(petition?.categoryId)],
             sortBy: "CREATED_ASC",
-            // count: 2
         }
         const ownerSearch = {
             startIndex: 0,
             ownerId: String(petition?.ownerId),
             sortBy: "CREATED_ASC",
-            // count: 2
         }
 
         // Console log for categorySearch

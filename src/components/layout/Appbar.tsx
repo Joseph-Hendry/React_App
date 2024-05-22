@@ -13,10 +13,6 @@ import {
     MenuItem, Avatar, Tooltip
 } from "@mui/material";
 
-const navItems = ['Home', 'About', 'Contact'];
-
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
-
 const Appbar = () => {
 
     // For navigation
@@ -108,15 +104,6 @@ const Appbar = () => {
                 <Typography onClick={handlePetitions} variant="h6" sx={{ display: 'block', marginRight: 5 }}>
                     Petition Site
                 </Typography>
-
-                {/* Buttons */}
-                <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
-                    {navItems.map((item) => (
-                        <Button key={item} sx={{ color: '#fff' }}>
-                            {item}
-                        </Button>
-                    ))}
-                </Box>
 
                 {/* Spacer Box */}
                 <Box sx={{ flexGrow: 1, display: 'block', marginRight: 5 }} />
