@@ -34,7 +34,7 @@ const button: CSS.Properties = {
     marginTop: "0",
     fontWeight: "bold",
     textTransform: "uppercase",
-    width: "100%"
+    width: "95%"
 };
 
 const PetitionsProfile = () => {
