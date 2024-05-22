@@ -13,20 +13,13 @@ type User = {
     email: string;
 }
 
-type UserLogin = {
+type UserStore = {
     /**
-     * User id as defined by the database
+     * User id
      */
     userId: number;
     /**
-     * Users unique token
+     * User token
      */
-    token: string;
-}
-
-type UserRegister = {
-    /**
-     * User id as defined by the database
-     */
-    userId: number;
+    userToken: string;
 }

@@ -13,15 +13,36 @@ interface PetitonSearchI {
     setPetitionSearch: (petitionSearch: PetitionSearch) => void;
 }
 
-const getLocalStorage = (key: string): PetitionSearch => JSON.parse(window.localStorage.getItem(key) as string) || {startIndex: 0};
-const setLocalStorage = (key: string, value: PetitionSearch) => window.localStorage.setItem(key, JSON.stringify(value));
+const getLocalStorage = (key: string): UserStore => JSON.parse(window.localStorage.getItem(key) as string) || { userId: -1, userToken: '' };
+const setLocalStorage = (key: string, value: UserStore) => window.localStorage.setItem(key, JSON.stringify(value));
 
 // Create store
 const useUserStore = create<UserStore>((set) => ({
-    userId: -1,
-    userToken: null,
-    setUserId: (id) => set({ userId: id }),
-    setUserToken: (token) => set({ userToken: token })
+    // Get user methods
+    userId: getLocalStorage('user').userId,
+    userToken: getLocalStorage('user').userToken,
+
+    // Set user methods
+    setUserId: (id) => set((state) => {
+
+        // Get current value
+        const temp = getLocalStorage('user');
+        temp.userId = id;
+
+        // Store
+        setLocalStorage('user', temp);
+        return { userId: id };
+    }),
+    setUserToken: (token) => set((state) => {
+
+        // Get current value
+        const temp = getLocalStorage('user');
+        temp.userToken = token;
+
+        // Store
+        setLocalStorage('user', temp);
+        return { userToken: token };
+    }),
 }));
 
 const usePetitionSearchStore = create<PetitonSearchI>((set) => ({
