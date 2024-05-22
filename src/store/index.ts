@@ -8,13 +8,6 @@ type UserStore = {
     setUserToken: (token: string | null) => void;
 }
 
-type PetitionsStore = {
-    petitions: Petitions | null;
-    categories: Category[];
-    setPetitions: (petitions: Petitions | null) => void;
-    setCategories: (categories: Category[]) => void;
-}
-
 interface PetitonSearchI {
     petitionSearch: PetitionSearch;
     setPetitionSearch: (petitionSearch: PetitionSearch) => void;
@@ -31,16 +24,9 @@ const useUserStore = create<UserStore>((set) => ({
     setUserToken: (token) => set({ userToken: token })
 }));
 
-const usePetitionStore = create<PetitionsStore>((set) => ({
-    petitions: null,
-    categories: [],
-    setPetitions: (petitions) => set({ petitions }),
-    setCategories: (newCategories) => set({ categories: newCategories })
-}));
-
 const usePetitionSearchStore = create<PetitonSearchI>((set) => ({
     petitionSearch: { startIndex: 0, sortBy: "CREATED_ASC" },
     setPetitionSearch: (newSearch) => set({ petitionSearch: newSearch })
 }));
 
-export { useUserStore, usePetitionStore, usePetitionSearchStore };
+export { useUserStore, usePetitionSearchStore };

@@ -1,5 +1,6 @@
 import * as React from "react";
-import {usePetitionSearchStore, usePetitionStore} from "../../store";
+import axios from "axios";
+import {usePetitionSearchStore} from "../../store";
 import { SelectChangeEvent } from '@mui/material/Select';
 import {
     Box,
@@ -84,8 +85,30 @@ const SearchBar = () => {
     const [sortOptionSelected, setSortOptionSelected] = React.useState('CREATED_ASC')
 
     // Get stored variables
-    const categories = usePetitionStore((state) => state.categories);
     const setPetitionSearch = usePetitionSearchStore((state) => state.setPetitionSearch)
+
+    // Categories
+    const [categories, setCategories] = React.useState<Category[] | null>(null);
+
+    // Error flags
+    const [errorFlag, setErrorFlag] = React.useState(false);
+    const [errorMessage, setErrorMessage] = React.useState("");
+
+    // Get the list of categories
+    React.useEffect(() => {
+        const getPetitions = () => {
+            axios.get('http://localhost:3000/api/v1/petitions/categories')
+                .then((response) => {
+                    setErrorFlag(false);
+                    setErrorMessage("");
+                    setCategories(response.data);
+                }, (error) => {
+                    setErrorFlag(true);
+                    setErrorMessage(error.toString());
+                });
+        };
+        getPetitions();
+    }, [setCategories]);
 
     // Handles search change
     const handleChangeSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -171,13 +194,13 @@ const SearchBar = () => {
                                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                                         {selected.map((categoryId) => (
                                             <Chip key={categoryId}
-                                                  label={categories.find(cat => cat.categoryId.toString() === categoryId)?.name || "Category Not Found"}/>
+                                                  label={categories?.find(cat => cat.categoryId.toString() === categoryId)?.name || "Category Not Found"}/>
                                         ))}
                                     </Box>
                                 )}
                                 MenuProps={MenuProps}>
 
-                                {categories.map((category, index) => (
+                                {categories?.map((category, index) => (
                                     <MenuItem key={category.categoryId} value={category.categoryId.toString()} >
                                         {category.name}
                                     </MenuItem>

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import CSS from 'csstype';
-import {usePetitionStore, useUserStore} from "../../store";
+import { useUserStore } from "../../store";
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import GroupsIcon from '@mui/icons-material/Groups';
 import {
@@ -44,10 +44,6 @@ const PetitionDetail = () => {
     // Petition ID
     const { id } = useParams();
 
-    // Error flags
-    const [errorFlag, setErrorFlag] = React.useState(false);
-    const [errorMessage, setErrorMessage] = React.useState("");
-
     // Petitions
     const [petition, setPetition] = React.useState<PetitionFull>()
     const [petitions, setPetitions] = React.useState<Petitions>()
@@ -58,8 +54,11 @@ const PetitionDetail = () => {
 
     // Categories
     const [categoryName, setCategoryName] = React.useState("");
-    const categories = usePetitionStore((state) => state.categories);
-    const setCategories = usePetitionStore((state) => state.setCategories);
+    const [categories, setCategories] = React.useState<Category[] | null>(null);
+
+    // Error flags
+    const [errorFlag, setErrorFlag] = React.useState(false);
+    const [errorMessage, setErrorMessage] = React.useState("");
 
     // Get the petition
     React.useEffect(() => {
@@ -173,7 +172,7 @@ const PetitionDetail = () => {
     const support_tier_rows = () => petition?.supportTiers.map((supportTier: SupportTier) => <SupportTierCard key={ supportTier.supportTierId } supportTier={supportTier} petitionId={Number(id)} />);
 
     // Get the petition cards
-    const petition_rows = () => petitions?.petitions.map((petition: Petition) => <PetitionCard key={ petition.petitionId } petition={petition} />);
+    const petition_rows = () => petitions?.petitions.map((petition: Petition) => <PetitionCard key={ petition.petitionId } petition={petition} categories={categories} />);
 
     // Format the date
     let formattedDate = "'N/A";

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import {usePetitionSearchStore, usePetitionStore, useUserStore} from "../../store";
+import { useUserStore } from "../../store";
 import axios from "axios";
 import PetitionCard from "../petitions/PetitionCard";
 import {Pagination, Paper, Typography} from "@mui/material";
@@ -33,20 +33,22 @@ const PetitionsProfile = () => {
     // For navigation
     const navigate = useNavigate();
 
-    // Error flags
-    const [errorFlag, setErrorFlag] = React.useState(false);
-    const [errorMessage, setErrorMessage] = React.useState("");
-
     // User information
     const userId = useUserStore((state) => state.userId);
 
     // Petitions
     const [petitions, setPetitions] = React.useState<Petitions | null>(null);
-    const setCategories = usePetitionStore((state) => state.setCategories);
+
+    // Categories
+    const [categories, setCategories] = React.useState<Category[] | null>(null);
 
     // Pagination Variables
     const [page, setPage] = React.useState(1)
     const [pageNum, setPageNum] = React.useState(10)
+
+    // Error flags
+    const [errorFlag, setErrorFlag] = React.useState(false);
+    const [errorMessage, setErrorMessage] = React.useState("");
 
     // Handles page change
     const handleChangePage = (event: React.ChangeEvent<unknown>, value: number) => {
@@ -101,7 +103,7 @@ const PetitionsProfile = () => {
     }, [setCategories]);
 
     // Get the cards
-    const petition_rows = () => petitions?.petitions.map((petition: Petition) => <PetitionCard key={ petition.petitionId } petition={petition} />);
+    const petition_rows = () => petitions?.petitions.map((petition: Petition) => <PetitionCard key={ petition.petitionId } petition={petition} categories={categories} />);
 
     return (
         <>

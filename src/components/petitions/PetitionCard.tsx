@@ -9,11 +9,11 @@ import {
     CardMedia,
     Typography,
     Avatar} from '@mui/material';
-import {usePetitionStore} from "../../store";
 
 // Petition Interface
 interface IPetitionProps {
     petition: Petition;
+    categories: Category[] | null;
 }
 
 // Card CSS
@@ -34,21 +34,22 @@ const cardContent: CSS.Properties = {
 
 const PetitionCard = (props: IPetitionProps) => {
 
-    // React Router's navigate hook
+    // For navigation
     const navigate = useNavigate();
 
-    // Error flags
-    const [errorFlag, setErrorFlag] = React.useState(false);
-    const [errorMessage, setErrorMessage] = React.useState("");
+    // Props
+    const { petition, categories } = props;
 
-    // Petition and photo
-    const { petition } = props;
+    // Petition picture
     const [petitionImageURL, setPetitionImageURL] = React.useState("https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png");
     const [petitionOwnerImageURL, setPetitionOwnerImageURL] = React.useState("https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png");
 
     // Categories
-    const categories = usePetitionStore((state) => state.categories);
     const [categoryName, setCategoryName] = React.useState("");
+
+    // Error flags
+    const [errorFlag, setErrorFlag] = React.useState(false);
+    const [errorMessage, setErrorMessage] = React.useState("");
 
     // Gets the petition image
     React.useEffect(() => {

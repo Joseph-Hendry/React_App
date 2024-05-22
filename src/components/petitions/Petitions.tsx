@@ -1,12 +1,11 @@
 import * as React from 'react';
 import PetitionCard from "./PetitionCard";
 import SearchBar from "./SearchBar";
-import {
-    usePetitionSearchStore,
-    usePetitionStore} from "../../store";
 import axios from "axios";
 import CSS from 'csstype';
-
+import {
+    usePetitionSearchStore
+} from "../../store";
 import {
     Paper,
     Typography,
@@ -41,10 +40,11 @@ const Petitions = () => {
     const [errorMessage, setErrorMessage] = React.useState("");
 
     // Petitions
-    const petitions = usePetitionStore((state) => state.petitions);
-    const setPetitions = usePetitionStore((state) => state.setPetitions);
-    const setCategories = usePetitionStore((state) => state.setCategories);
+    const [petitions, setPetitions] = React.useState<Petitions | null>();
     const petitionSearch = usePetitionSearchStore((state) => state.petitionSearch)
+
+    // Categories
+    const [categories, setCategories] = React.useState<Category[] | null>(null);
 
     // Pagination Variables
     const [page, setPage] = React.useState(1)
@@ -100,7 +100,7 @@ const Petitions = () => {
     }, [setCategories]);
 
     // Get the cards
-    const petition_rows = () => petitions?.petitions.map((petition: Petition) => <PetitionCard key={ petition.petitionId } petition={petition} />);
+    const petition_rows = () => petitions?.petitions.map((petition: Petition) => <PetitionCard key={ petition.petitionId } petition={petition} categories={categories} />);
 
     return (
         <>
