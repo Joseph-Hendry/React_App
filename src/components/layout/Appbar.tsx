@@ -71,12 +71,6 @@ const Appbar = () => {
         navigate('/user/profile');
     };
 
-    // Handles edit profile button
-    const handleEditProfile = () => {
-        setAnchorElUser(null);
-        navigate('/user/profile');
-    };
-
     // Handles logout button
     const handleLogout = () => {
         setAnchorElUser(null);
@@ -140,11 +134,6 @@ const Appbar = () => {
                             {/* Profile */}
                             <MenuItem onClick={handleProfile}>
                                 <Typography textAlign="center">Profile</Typography>
-                            </MenuItem>
-
-                            {/* Edit Profile */}
-                            <MenuItem onClick={handleEditProfile}>
-                                <Typography textAlign="center">Edit Profile</Typography>
                             </MenuItem>
 
                             {/* My Petitions */}

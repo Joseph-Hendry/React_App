@@ -1,14 +1,37 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
-import {useUserStore} from "../../store";
+import { useUserStore } from "../../store";
 import {
     Paper,
     Typography,
-    Pagination, Avatar
+    Avatar,
+    Button,
+    Box, CssBaseline, Grid, TextField, Container
 } from '@mui/material';
-import Link from "@mui/material/Link";
-import Button from "@mui/material/Button";
+import CSS from 'csstype';
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+
+// Profile Paper CSS
+const profilePaper: CSS.Properties = {
+    padding: "20px",
+    margin: "20px",
+    maxWidth: "600px",
+    width: "100%",
+    textAlign: "center",
+    display: "inline-block",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "20px"
+};
+
+// Title CSS
+const titleStyle: CSS.Properties = {
+    margin: "10px",
+    color: "#333",
+    fontWeight: "bold",
+    textTransform: "uppercase",
+};
 
 const Profile = () => {
 
@@ -25,7 +48,7 @@ const Profile = () => {
     const [errorFlag, setErrorFlag] = React.useState(false);
     const [errorMessage, setErrorMessage] = React.useState("");
 
-    // Form Varibles
+    // Form Variables
     const [user, setUser] = React.useState<User|null>()
 
     // Profile photo
@@ -65,30 +88,84 @@ const Profile = () => {
 
     return (
         <>
+        <Container component="main" maxWidth="xs">
+            <CssBaseline/>
+            <Box
+                sx={{
+                    marginTop: 8,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                }}>
 
-            {/* Profile Photo */}
-            <Avatar
-                src={profileImageURL}
-                sx={{ width: 200, height: 200 }}/>
+                {/* Edit Profile Title */}
+                <Typography component="h1" variant="h5" sx={{mt: 2}}>
+                    Profile
+                </Typography>
 
-            {/* Name */}
-            <Typography variant="h4">
-                {user?.firstName + " " + user?.lastName}
-            </Typography>
+                {/* Profile Photo */}
+                <Avatar
+                    src={profileImageURL}
+                    sx={{width: 100, height: 100, mt: 2}}/>
 
-            {/* Email */}
-            <Typography variant="h4">
-                {user?.email}
-            </Typography>
+                {/* Form Grid */}
+                <Box sx={{mt: 3}}>
+                    <Grid container spacing={2} alignItems="baseline">
 
-            <Button onClick={() => {navigate("/user/profile/edit")}}>
-                Edit Profile
-            </Button>
+                        {/* First Name */}
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                fullWidth
+                                disabled
+                                value={user?.firstName}/>
+                        </Grid>
 
-            <Button onClick={() => {navigate("/user/profile/change-password")}}>
-                Change Password
-            </Button>
+                        {/* Last Name */}
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                fullWidth
+                                disabled
+                                value={user?.lastName}/>
+                        </Grid>
+
+                        {/* Email Address */}
+                        <Grid item xs={12}>
+                            <TextField
+                                fullWidth
+                                disabled
+                                value={user?.email}/>
+                        </Grid>
+
+                        {/* Cancel Button */}
+                        <Grid item xs={12} sm={6} mt={1}>
+                            <Button
+                                variant="outlined"
+                                onClick={() => {navigate("/user/profile/edit");}}>
+                                Edit Profile
+                            </Button>
+                        </Grid>
+
+                        {/* Save Button */}
+                        <Grid item xs={12} sm={6} mt={1}>
+                            <Button
+                                variant="outlined"
+                                onClick={() => {navigate("/user/profile/change-password");}}>
+                                Change Password
+                            </Button>
+                        </Grid>
+                    </Grid>
+
+                    {/* Error Flag */}
+                    {errorFlag && (
+                        <Typography variant="body2" color="error">
+                            There's an error :(
+                        </Typography>
+                    )}
+                </Box>
+            </Box>
+        </Container>
         </>
+
     );
 };
 
