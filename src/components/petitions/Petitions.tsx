@@ -56,7 +56,7 @@ const Petitions = () => {
     React.useEffect(() => {
 
         // Set pagination variables
-        petitionSearch.startIndex = page * ITEMS_PER_PAGE;
+        petitionSearch.startIndex = (page - 1) * ITEMS_PER_PAGE;
         petitionSearch.count = ITEMS_PER_PAGE;
 
         // Send request
@@ -66,7 +66,10 @@ const Petitions = () => {
                     setErrorFlag(false);
                     setErrorMessage("");
                     setPetitions(response.data);
-                    setPageNum(Math.ceil((response.data?.count || 0) / ITEMS_PER_PAGE));
+                    console.log("Start Index: " + petitionSearch.startIndex );
+                    console.log("Count: " + response.data?.count);
+                    console.log("Pages: " + Math.ceil((response.data?.count || 0) / ITEMS_PER_PAGE));
+                    setPageNum(Math.max(1, Math.ceil((response.data?.count || 0) / ITEMS_PER_PAGE)));
                 }, (error) => {
                     setErrorFlag(true);
                     setErrorMessage(error.toString());

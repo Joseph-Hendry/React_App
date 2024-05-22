@@ -142,7 +142,7 @@ const SearchBar = (props: ISearchProps) => {
     // Handles submit
     const handleSubmit = () => {
         setPetitionSearch({
-            startIndex:0,
+            startIndex: 0,
             q: search || undefined,
             categoryIds: categoriesSelectedIds.length > 0 ? categoriesSelectedIds.map(Number): undefined,
             supportingCost: price !== 100 ? price + 1: undefined,
