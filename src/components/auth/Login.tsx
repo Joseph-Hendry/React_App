@@ -38,25 +38,27 @@ const Login = () => {
 
     // Submits the login form
     const handleSubmit = async () => {
-
         try {
             // Send Login
-            const responseLogin = await axios.post('http://localhost:3000/api/v1/users/login', { email:email, password:password });
+            const responseLogin = await axios.post('http://localhost:3000/api/v1/users/login', { email: email, password: password });
 
-            // Set use data
+            // Set user data
             setUserId(responseLogin.data.userId);
             setUserToken(responseLogin.data.token);
 
-            // Get user image
-            const responseImg = await axios.get(`http://localhost:3000/api/v1/users/${responseLogin.data.userId}/image`, {responseType: "blob"});
+            try {
+                // Get user image
+                const responseImg = await axios.get(`http://localhost:3000/api/v1/users/${responseLogin.data.userId}/image`, { responseType: "blob" });
 
-            // Set user image
-            setUserImgURL(URL.createObjectURL(responseImg.data));
+                // Set user image
+                setUserImgURL(URL.createObjectURL(responseImg.data));
+            } catch (imageError) {}
 
         } catch (error) {
-            console.log(error);
+            console.error('An error occurred during login:', error);
         }
-    }
+    };
+
 
     return (
         <Container component="main" maxWidth="xs">
