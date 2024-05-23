@@ -22,4 +22,8 @@ type UserStore = {
      * User token
      */
     userToken: string;
+    /**
+     * User img URL
+     */
+    userImgURL: string;
 }

@@ -4,11 +4,14 @@ import { create } from 'zustand';
 type UserStore = {
     userId: number;
     userToken: string | null;
+    userImgURL: string;
     setUserId: (id: number) => void;
     setUserToken: (token: string | null) => void;
+    setUserImgURL: (url: string) => void;
 }
 
-const getLocalStorage = (key: string): UserStore => JSON.parse(window.localStorage.getItem(key) as string) || { userId: -1, userToken: '' };
+// Local Storage Get & Set
+const getLocalStorage = (key: string): UserStore => JSON.parse(window.localStorage.getItem(key) as string) || { userId: -1, userToken: '', userImgURL: '' };
 const setLocalStorage = (key: string, value: UserStore) => window.localStorage.setItem(key, JSON.stringify(value));
 
 // Create store
@@ -16,10 +19,10 @@ const useUserStore = create<UserStore>((set) => ({
     // Get user methods
     userId: getLocalStorage('user').userId,
     userToken: getLocalStorage('user').userToken,
+    userImgURL: getLocalStorage('user').userImgURL,
 
     // Set user methods
-    setUserId: (id) => set((state) => {
-
+    setUserId: (id) => set(() => {
         // Get current value
         const temp = getLocalStorage('user');
         temp.userId = id;
@@ -28,8 +31,7 @@ const useUserStore = create<UserStore>((set) => ({
         setLocalStorage('user', temp);
         return { userId: id };
     }),
-    setUserToken: (token) => set((state) => {
-
+    setUserToken: (token) => set(() => {
         // Get current value
         const temp = getLocalStorage('user');
         temp.userToken = token;
@@ -37,6 +39,15 @@ const useUserStore = create<UserStore>((set) => ({
         // Store
         setLocalStorage('user', temp);
         return { userToken: token };
+    }),
+    setUserImgURL: (url) => set(() => {
+        // Get current value
+        const temp = getLocalStorage('user');
+        temp.userImgURL = url;
+
+        // Store
+        setLocalStorage('user', temp);
+        return { userToken: url };
     }),
 }));
 
