@@ -25,7 +25,7 @@ const Profile = () => {
     const [errorMessage, setErrorMessage] = React.useState("");
 
     // Form Variables
-    const [user, setUser] = React.useState<User|null>()
+    const [user, setUser] = React.useState<User | null>()
 
     // Profile photo
     const [profileImageURL, setProfileImageURL] = React.useState("https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png");
@@ -93,7 +93,7 @@ const Profile = () => {
                             <TextField
                                 fullWidth
                                 disabled
-                                value={user?.firstName}/>
+                                value={user?.firstName || ""}/>
                         </Grid>
 
                         {/* Last Name */}
@@ -101,7 +101,7 @@ const Profile = () => {
                             <TextField
                                 fullWidth
                                 disabled
-                                value={user?.lastName}/>
+                                value={user?.lastName || ""}/>
                         </Grid>
 
                         {/* Email Address */}
@@ -109,7 +109,7 @@ const Profile = () => {
                             <TextField
                                 fullWidth
                                 disabled
-                                value={user?.email}/>
+                                value={user?.email || ""}/>
                         </Grid>
 
                         {/* Cancel Button */}
