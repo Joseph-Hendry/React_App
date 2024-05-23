@@ -41,11 +41,11 @@ const PetitionCard = (props: IPetitionProps) => {
     const { petition, categories } = props;
 
     // Petition picture
-    const [petitionImageURL, setPetitionImageURL] = React.useState("https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png");
-    const [petitionOwnerImageURL, setPetitionOwnerImageURL] = React.useState("https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png");
+    const [petitionImageURL, setPetitionImageURL] = React.useState('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
+    const [petitionOwnerImageURL, setPetitionOwnerImageURL] = React.useState('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
 
     // Categories
-    const [categoryName, setCategoryName] = React.useState("");
+    const [categoryName, setCategoryName] = React.useState('');
 
     // Error flags
     const [errorFlag, setErrorFlag] = React.useState(false);
@@ -54,7 +54,7 @@ const PetitionCard = (props: IPetitionProps) => {
     // Gets the petition image
     React.useEffect(() => {
         const getPetitionImg = () => {
-            axios.get(`http://localhost:3000/api/v1/petitions/${petition.petitionId}/image`, {responseType: "blob"})
+            axios.get(`http://localhost:3000/api/v1/petitions/${petition.petitionId}/image`, {responseType: 'blob'})
                 .then((response) => {
                     setErrorFlag(false);
                     setErrorMessage("");
@@ -122,7 +122,7 @@ const PetitionCard = (props: IPetitionProps) => {
                 height="300"
                 width="300"
                 image={petitionImageURL}
-                alt="Auction hero"
+                alt="Hero Image"
             />
 
             {/* Contents */}

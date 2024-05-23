@@ -2,21 +2,17 @@ import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useUserStore } from '../../store';
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import {
-    Paper,
     Typography,
     Avatar,
     TextField,
     Button,
-    IconButton,
-    InputAdornment,
     Container,
     CssBaseline,
     Box,
     Grid,
 } from '@mui/material';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 
 const EditProfile = () => {
 
@@ -26,12 +22,8 @@ const EditProfile = () => {
     // User information
     const userId = useUserStore((state) => state.userId);
     const userToken = useUserStore((state) => state.userToken);
-    const setUserId = useUserStore((state) => state.setUserId);
-    // const setUserToken = useUserStore((state) => state.setUserToken);
-
-    // Error flags
-    const [errorFlag, setErrorFlag] = React.useState(false);
-    const [errorMessage, setErrorMessage] = React.useState('');
+    const userImgURL = useUserStore((state) => state.userImgURL);
+    const setUserImgURL = useUserStore((state) => state.setUserImgURL);
 
     // Form variables
     const [firstName, setFirstName] = React.useState('');
@@ -40,8 +32,12 @@ const EditProfile = () => {
 
     // Profile photo
     const [profilePicture, setProfilePicture] = React.useState<File | null>(null);
-    const [profilePictureURL, setProfilePictureURL] = React.useState('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
+    const [profilePictureURL, setProfilePictureURL] = React.useState(userImgURL);
     const [profilePictureRemoved, setProfilePictureRemoved] = React.useState(false);
+
+    // Error flags
+    const [errorFlag, setErrorFlag] = React.useState(false);
+    const [errorMessage, setErrorMessage] = React.useState('');
 
     // Get user's current information
     React.useEffect(() => {
@@ -66,26 +62,6 @@ const EditProfile = () => {
         getUser();
     }, [userId, userToken]);
 
-    // Get user's profile image
-    React.useEffect(() => {
-        const getProfileImage = async () => {
-            try {
-                // Send request
-                const response = await axios.get(`http://localhost:3000/api/v1/users/${userId}/image`, {
-                    responseType: 'blob',
-                });
-
-                // Set variables
-                setProfilePictureURL(URL.createObjectURL(response.data));
-                setErrorFlag(false);
-                setErrorMessage('');
-            } catch (error) {
-                setErrorFlag(true);
-            }
-        };
-        getProfileImage();
-    }, [userId]);
-
     // Handle profile picture change
     const handleProfilePictureChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         // Add file if valid
@@ -101,9 +77,10 @@ const EditProfile = () => {
 
     // Handle remove profile picture
     const handleRemove = () => {
-        setProfilePictureRemoved(true);
-        setProfilePicture(null)
-        setProfilePictureURL('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
+        if (userImgURL !== 'https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png')
+            setProfilePictureRemoved(true);
+            setProfilePicture(null)
+            setProfilePictureURL('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
     };
 
     // Handle cancel
@@ -135,6 +112,7 @@ const EditProfile = () => {
                         'Content-Type': profilePicture.type,
                     },
                 });
+                setUserImgURL(profilePictureURL);
 
             // Delete photo if removed
             } else if (profilePictureRemoved) {
@@ -143,6 +121,7 @@ const EditProfile = () => {
                         'X-Authorization': userToken
                     }
                 });
+                setUserImgURL('');
             }
 
             // Navigate to profile page

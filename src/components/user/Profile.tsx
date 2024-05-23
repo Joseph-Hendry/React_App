@@ -17,34 +17,15 @@ const Profile = () => {
     // User information
     const userId = useUserStore((state) => state.userId);
     const userToken = useUserStore((state) => state.userToken);
-    const setUserId = useUserStore((state) => state.setUserId);
-    const setUserToken = useUserStore((state) => state.setUserToken);
-
-    // Error flags
-    const [errorFlag, setErrorFlag] = React.useState(false);
-    const [errorMessage, setErrorMessage] = React.useState("");
+    const userImgURL = useUserStore((state) => state.userImgURL);
+    const setUserImgURL = useUserStore((state) => state.setUserImgURL);
 
     // Form Variables
     const [user, setUser] = React.useState<User | null>()
 
-    // Profile photo
-    const [profileImageURL, setProfileImageURL] = React.useState("https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png");
-
-    // Gets the users profile image
-    React.useEffect(() => {
-        const getPetitionOwnerImg = () => {
-            axios.get(`http://localhost:3000/api/v1/users/${userId}/image`, {responseType: "blob"})
-                .then((response) => {
-                    setErrorFlag(false);
-                    setErrorMessage("");
-                    setProfileImageURL(URL.createObjectURL(response.data));
-                }, (error) => {
-                    setErrorFlag(true);
-                    setErrorMessage(error.toString());
-                });
-        };
-        getPetitionOwnerImg();
-    }, [userId, setUserId]);
+    // Error flags
+    const [errorFlag, setErrorFlag] = React.useState(false);
+    const [errorMessage, setErrorMessage] = React.useState("");
 
     // Get user information
     React.useEffect(() => {
@@ -59,8 +40,9 @@ const Profile = () => {
                     setErrorMessage(error.toString());
                 });
         };
+
         getUser();
-    }, [userId, setUserId, userToken, setUserToken]);
+    }, [userId, userToken]);
 
     return (
         <>
@@ -81,7 +63,7 @@ const Profile = () => {
 
                 {/* Profile Photo */}
                 <Avatar
-                    src={profileImageURL}
+                    src={userImgURL}
                     sx={{width: 100, height: 100, mt: 2}}/>
 
                 {/* Form Grid */}

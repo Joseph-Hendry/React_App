@@ -11,7 +11,7 @@ type UserStore = {
 }
 
 // Local Storage Get & Set
-const getLocalStorage = (key: string): UserStore => JSON.parse(window.localStorage.getItem(key) as string) || { userId: -1, userToken: '', userImgURL: '' };
+const getLocalStorage = (key: string): UserStore => JSON.parse(window.localStorage.getItem(key) as string) || { userId: -1, userToken: '', userImgURL: 'https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png' };
 const setLocalStorage = (key: string, value: UserStore) => window.localStorage.setItem(key, JSON.stringify(value));
 
 // Create store
@@ -43,11 +43,11 @@ const useUserStore = create<UserStore>((set) => ({
     setUserImgURL: (url) => set(() => {
         // Get current value
         const temp = getLocalStorage('user');
-        temp.userImgURL = url;
+        temp.userImgURL = url === '' ? 'https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png' : url;
 
         // Store
         setLocalStorage('user', temp);
-        return { userToken: url };
+        return { userImgURL: temp.userImgURL };
     }),
 }));
 

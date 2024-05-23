@@ -1,7 +1,6 @@
 import React from "react";
 import { useNavigate } from 'react-router-dom';
 import {useUserStore} from "../../store";
-import axios from "axios";
 import {
     AppBar,
     Button,
@@ -18,37 +17,18 @@ const Appbar = () => {
     // For navigation
     const navigate = useNavigate();
 
-    // Error flags
-    const [errorFlag, setErrorFlag] = React.useState(false);
-    const [errorMessage, setErrorMessage] = React.useState("");
-
     // User information
-    const userId = useUserStore((state) => state.userId);
     const userToken = useUserStore((state) => state.userToken);
+    const userImgURL = useUserStore((state) => state.userImgURL);
     const setUserId = useUserStore((state) => state.setUserId);
     const setUserToken = useUserStore((state) => state.setUserToken);
-
-    // Profile photo
-    const [profileImageURL, setProfileImageURL] = React.useState("https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png");
 
     // Menu Items
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
 
-    // Gets the users profile image
-    React.useEffect(() => {
-        const getPetitionOwnerImg = () => {
-            axios.get(`http://localhost:3000/api/v1/users/${userId}/image`, {responseType: "blob"})
-                .then((response) => {
-                    setErrorFlag(false);
-                    setErrorMessage("");
-                    setProfileImageURL(URL.createObjectURL(response.data));
-                }, (error) => {
-                    setErrorFlag(true);
-                    setErrorMessage(error.toString());
-                });
-        };
-        getPetitionOwnerImg();
-    }, [userId, setUserId]);
+    // Error flags
+    const [errorFlag, setErrorFlag] = React.useState(false);
+    const [errorMessage, setErrorMessage] = React.useState("");
 
     // Handles petitions button
     const handlePetitions = () => {
@@ -109,7 +89,7 @@ const Appbar = () => {
                         {/* Profile Photo */}
                         <Tooltip title="Open settings">
                             <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                                <Avatar src={profileImageURL}
+                                <Avatar src={userImgURL}
                                         sx={{ width: 47, height: 47, marginRight: 1 }}/>
                             </IconButton>
                         </Tooltip>

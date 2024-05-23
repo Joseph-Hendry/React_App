@@ -7,7 +7,6 @@ import TextField from '@mui/material/TextField';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import axios from "axios";
@@ -21,9 +20,10 @@ const Register = () => {
     // For navigation
     const navigate = useNavigate();
 
-    // Error flags
-    const [errorFlag, setErrorFlag] = React.useState(false);
-    const [errorMessage, setErrorMessage] = React.useState("");
+    // User information
+    const setUserId = useUserStore((state) => state.setUserId);
+    const setUserToken = useUserStore((state) => state.setUserToken);
+    const setUserImgURL = useUserStore((state) => state.setUserImgURL);
 
     // Form values
     const [firstName, setFirstName] = React.useState("");
@@ -32,22 +32,28 @@ const Register = () => {
     const [password, setPassword] = React.useState("");
     const [showPassword, setShowPassword] = React.useState(false);
     const [profilePicture, setProfilePicture] = React.useState<File | null>(null);
-    const [profilePictureURL, setProfilePictureURL] = React.useState<string | null>(null);
+    const [profilePictureURL, setProfilePictureURL] = React.useState<string>('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
 
-    // User information
-    const setUserId = useUserStore((state) => state.setUserId);
-    const setUserToken = useUserStore((state) => state.setUserToken);
+    // Error flags
+    const [errorFlag, setErrorFlag] = React.useState(false);
+    const [errorMessage, setErrorMessage] = React.useState("");
 
     // Hides the password
     const handleClickShowPassword = () => setShowPassword((show) => !show);
 
     // Handles uploading a profile picture
-    const handleProfilePictureChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChangeImg = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
             setProfilePicture(file);
             setProfilePictureURL(URL.createObjectURL(file));
         }
+    };
+
+    // Handle remove img
+    const handleRemoveImg = () => {
+        setProfilePicture(null)
+        setProfilePictureURL('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
     };
 
     // Submits the register form
@@ -86,6 +92,7 @@ const Register = () => {
                         "Content-Type": profilePicture.type
                     },
                 });
+                setUserImgURL(profilePictureURL);
             }
 
             // Navigate to profile page
@@ -107,19 +114,47 @@ const Register = () => {
                     alignItems: 'center',
                 }}>
 
-                {/* Icon */}
-                <Avatar sx={{m: 1, bgcolor: 'secondary.main'}}>
-                    <LockOutlinedIcon/>
-                </Avatar>
-
                 {/* Sign Up Title */}
                 <Typography component="h1" variant="h5">
                     Sign up
                 </Typography>
 
+                {/* Icon */}
+                <Avatar
+                    src={profilePictureURL}
+                    sx={{ width: 100, height: 100, mt:2 }}>
+                </Avatar>
+
                 {/* Register Form Grid */}
                 <Box sx={{mt: 3}}>
                     <Grid container spacing={2}>
+
+                        {/* Upload Button */}
+                        <Grid item xs={6} mb={2}>
+                            <Button
+                                fullWidth
+                                variant="outlined"
+                                component="label"
+                                startIcon={<CloudUploadIcon />}>
+                                Upload
+                                <input
+                                    type="file"
+                                    hidden
+                                    onChange={handleChangeImg}/>
+                            </Button>
+                        </Grid>
+
+                        {/* Remove Button */}
+                        <Grid item xs={6} mb={2}>
+                            <Button
+                                fullWidth
+                                variant="outlined"
+                                color="error"
+                                component="label"
+                                onClick={handleRemoveImg}>
+                                Remove
+                            </Button>
+                        </Grid>
 
                         {/* First Name */}
                         <Grid item xs={12} sm={6}>
@@ -178,30 +213,6 @@ const Register = () => {
                                 }}/>
                         </Grid>
 
-                        {/* Upload Profile Photo */}
-                        <Grid item xs={12}>
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-
-                                {/* Profile Photo */}
-                                <Avatar
-                                    src={profilePictureURL || ""}
-                                    sx={{ width: 45, height: 45, mr: 2 }}/>
-
-                                {/* Upload Profile Photo */}
-                                <Button
-                                    fullWidth
-                                    variant="outlined"
-                                    component="label"
-                                    startIcon={<CloudUploadIcon />}>
-                                    Upload Profile Picture
-                                    <input
-                                        type="file"
-                                        hidden
-                                        onChange={handleProfilePictureChange}/>
-                                </Button>
-                            </Box>
-                        </Grid>
-
                         {/* Sign Up Button */}
                         <Grid item xs={12}>
                             <Button
@@ -219,7 +230,7 @@ const Register = () => {
 
                         {/* Sign Up Button */}
                         <Grid item xs={12}>
-                            <Link onClick={() => {navigate("/users/login")}} variant="body2">
+                            <Link onClick={() => {navigate("/auth/login")}} variant="body2">
                                 Already have an account? Sign in
                             </Link>
                         </Grid>
