@@ -80,7 +80,6 @@ const PetitionDetail = () => {
                     setErrorFlag(false);
                     setErrorMessage("");
                     setPetition(response.data);
-                    console.log(JSON.stringify(response.data, null, 2));
                 }, (error) => {
                     setErrorFlag(true);
                     setErrorMessage(error.toString());
