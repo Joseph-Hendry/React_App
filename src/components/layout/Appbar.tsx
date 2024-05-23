@@ -22,6 +22,7 @@ const Appbar = () => {
     const userImgURL = useUserStore((state) => state.userImgURL);
     const setUserId = useUserStore((state) => state.setUserId);
     const setUserToken = useUserStore((state) => state.setUserToken);
+    const setUserImgURL = useUserStore((state) => state.setUserImgURL);
 
     // Menu Items
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
@@ -56,6 +57,7 @@ const Appbar = () => {
         setAnchorElUser(null);
         setUserId(-1);
         setUserToken(null);
+        setUserImgURL('')
         navigate('/auth/login');
     };
 

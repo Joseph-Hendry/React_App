@@ -18,7 +18,6 @@ const Profile = () => {
     const userId = useUserStore((state) => state.userId);
     const userToken = useUserStore((state) => state.userToken);
     const userImgURL = useUserStore((state) => state.userImgURL);
-    const setUserImgURL = useUserStore((state) => state.setUserImgURL);
 
     // Form Variables
     const [user, setUser] = React.useState<User | null>()
@@ -123,7 +122,6 @@ const Profile = () => {
             </Box>
         </Container>
         </>
-
     );
 };
 

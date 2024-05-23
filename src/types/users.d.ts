@@ -13,7 +13,7 @@ type User = {
     email: string;
 }
 
-type UserStore = {
+type UserStored = {
     /**
      * User id
      */
