@@ -167,7 +167,8 @@ const EditPetition = () => {
             description,
             categoryId: Number(categoryId)
         };
-        console.log(JSON.stringify(updatePetitionRequestBody, null, 2));
+
+        // TODO: Fix error delete if one petition left
 
         try {
             // Update petition details
