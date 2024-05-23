@@ -11,32 +11,17 @@ import {
     Box,
     Typography,
     MenuItem,
-    InputAdornment,
-    IconButton,
     Grid,
     CssBaseline,
     Avatar,
     InputLabel,
     Select,
     OutlinedInput,
-    Chip,
     FormControl,
     Card,
     CardContent,
     CardHeader
 } from '@mui/material';
-
-// Global Variables
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-    PaperProps: {
-        style: {
-            maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-            width: 250,
-        },
-    },
-};
 
 const CreatePetition = () => {
 
@@ -44,7 +29,6 @@ const CreatePetition = () => {
     const navigate = useNavigate();
 
     // User information
-    const userId = useUserStore((state) => state.userId);
     const userToken = useUserStore((state) => state.userToken);
 
     // Form values
@@ -143,30 +127,32 @@ const CreatePetition = () => {
             categoryId: Number(categoryId),
             supportTiers,
         }
-        console.log(JSON.stringify(createRequestBody, null, 2));
 
-
-        // Create the petition
-        const petitionId = await axios.post('http://localhost:3000/api/v1/petitions', createRequestBody, {
-            headers: {
-                "X-Authorization": userToken,
-            },
-        });
-
-        //console.log(error.response.statusText);
-
-        // Upload profile photo if it exists
-        if (petitionPicture) {
-            await axios.put(`http://localhost:3000/api/v1/petitions/${petitionId}/image`, petitionPicture, {
+        try {
+            // Create the petition
+            const response = await axios.post('http://localhost:3000/api/v1/petitions', createRequestBody, {
                 headers: {
                     "X-Authorization": userToken,
-                    "Content-Type": petitionPicture.type,
                 },
             });
-        }
 
-        // Navigate to my petitions page
-        navigate("/user/petitions");
+            // Upload profile photo if it exists
+            if (petitionPicture) {
+                await axios.put(`http://localhost:3000/api/v1/petitions/${response.data.petitionId}/image`, petitionPicture, {
+                    headers: {
+                        "X-Authorization": userToken,
+                        "Content-Type": petitionPicture.type,
+                    },
+                });
+            }
+
+            // Navigate to my petitions page
+            navigate("/user/petitions");
+
+        } catch (error) {
+            // @ts-ignore
+            console.log(error.response.statusText);
+        }
     };
 
     return (
@@ -258,7 +244,7 @@ const CreatePetition = () => {
                                     onChange={handleChangeCategory}
                                     input={<OutlinedInput id="select-category" label="Category" />}
                                     MenuProps={{ PaperProps: { style: { maxHeight: 224, width: 250 } } }}>
-                                    {categories?.map((category, index) => (
+                                    {categories?.map((category) => (
                                         <MenuItem key={category.categoryId} value={category.categoryId.toString()}>
                                             {category.name}
                                         </MenuItem>
