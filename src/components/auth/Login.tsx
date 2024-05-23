@@ -30,23 +30,32 @@ const Login = () => {
 
     // User information
     const setUserId = useUserStore((state) => state.setUserId);
-    const setUserToken = useUserStore((state) => state.setUserToken);
+    const setUserToken = useUserStore((state) => state.setUserToken)
+    const setUserImgURL = useUserStore((state) => state.setUserImgURL);
 
     // Hides the password
     const handleClickShowPassword = () => setShowPassword((show) => !show);
 
     // Submits the login form
-    const handleSubmit = () => {
-        axios.post('http://localhost:3000/api/v1/users/login', { email:email, password:password })
-            .then((response) => {
-                setUserId(response.data.userId);
-                setUserToken(response.data.token)
-                navigate('/users/profile');
-            }, (error) => {
-                setErrorFlag(true);
-                setErrorMessage(error.toString());
-            });
+    const handleSubmit = async () => {
 
+        try {
+            // Send Login
+            const responseLogin = await axios.post('http://localhost:3000/api/v1/users/login', { email:email, password:password });
+
+            // Set use data
+            setUserId(responseLogin.data.userId);
+            setUserToken(responseLogin.data.token);
+
+            // Get user image
+            const responseImg = await axios.get(`http://localhost:3000/api/v1/users/${responseLogin.data.userId}/image`, {responseType: "blob"});
+
+            // Set user image
+            setUserImgURL(URL.createObjectURL(responseImg.data));
+
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     return (
