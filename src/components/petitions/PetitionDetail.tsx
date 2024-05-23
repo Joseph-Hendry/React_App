@@ -80,6 +80,7 @@ const PetitionDetail = () => {
                     setErrorFlag(false);
                     setErrorMessage("");
                     setPetition(response.data);
+                    console.log(JSON.stringify(response.data, null, 2));
                 }, (error) => {
                     setErrorFlag(true);
                     setErrorMessage(error.toString());
@@ -118,7 +119,7 @@ const PetitionDetail = () => {
                 });
         };
         getPetitions();
-    }, [setCategories]);
+    }, []);
 
     // Gets the petition owners image
     React.useEffect(() => {
@@ -133,7 +134,10 @@ const PetitionDetail = () => {
                     setErrorMessage(error.toString());
                 });
         };
-        getPetitionOwnerImg();
+
+        if (petition?.ownerId) {
+            getPetitionOwnerImg();
+        }
     }, [petition?.ownerId]);
 
     // Get the category name
@@ -160,12 +164,12 @@ const PetitionDetail = () => {
         const categorySearch = {
             startIndex: 0,
             categoryIds: [String(petition?.categoryId)],
-            sortBy: "CREATED_ASC",
+            // sortBy: "CREATED_ASC",
         }
         const ownerSearch = {
             startIndex: 0,
             ownerId: String(petition?.ownerId),
-            sortBy: "CREATED_ASC",
+            // sortBy: "CREATED_ASC",
         }
 
         // Send request
@@ -206,8 +210,11 @@ const PetitionDetail = () => {
                 // @ts-ignore
                 // console.error(error.response.statusText);
             }
-        };
-        getPetitions();
+        }
+
+        if (petition?.categoryId) {
+            getPetitions();
+        }
     }, [petition?.categoryId, petition?.ownerId, petition?.petitionId]);
 
     // Supports a petition
@@ -317,7 +324,7 @@ const PetitionDetail = () => {
 
                         {/* Funds Raised Chip */}
                         <Box sx={{ marginBottom: 1 }}>
-                            <Chip icon={<HandshakeIcon />} variant="outlined" label={"  $" + petition?.moneyRaised} sx={{ minWidth: 100, justifyContent: "left" }} />
+                            <Chip icon={<HandshakeIcon />} variant="outlined" label={"  $" + petition?.moneyRaised ? 0 : petition?.moneyRaised} sx={{ minWidth: 100, justifyContent: "left" }} />
                         </Box>
 
                         {/* Supporters Chip */}
