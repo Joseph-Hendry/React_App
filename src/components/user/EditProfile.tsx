@@ -128,8 +128,7 @@ const EditProfile = () => {
             navigate('/user/profile');
 
         } catch (error) {
-            setErrorFlag(true);
-            // setErrorMessage(error.toString());
+            console.error('An error occurred during login:', error);
         }
     };
 
