@@ -68,7 +68,7 @@ const EditPetition = () => {
     const [errorFlag, setErrorFlag] = useState(false);
     const [errorMessage, setErrorMessage] = useState('Error :(');
 
-    // Gets categries
+    // Gets categories
     useEffect(() => {
         axios.get('http://localhost:3000/api/v1/petitions/categories')
             .then((response) => {

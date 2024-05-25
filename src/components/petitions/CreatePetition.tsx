@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useUserStore } from '../../store';
+import CSS from 'csstype';
 import { SelectChangeEvent } from '@mui/material/Select';
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import {
@@ -22,6 +23,13 @@ import {
     CardContent,
     CardHeader
 } from '@mui/material';
+
+// Title CSS
+const titleStyle: CSS.Properties = {
+    color: "#333",
+    fontWeight: "bold",
+    textTransform: "uppercase",
+};
 
 const CreatePetition = () => {
 
@@ -167,14 +175,14 @@ const CreatePetition = () => {
                 }}>
 
                 {/* Create Petition Title */}
-                <Typography component="h1" variant="h5" sx={{ mt: 2 }}>
+                <Typography variant="h4" style={titleStyle}>
                     Create Petition
                 </Typography>
 
                 {/* Petition Photo */}
                 <Avatar
                     src={petitionPictureURL}
-                    sx={{ width: 100, height: 100, mt:2 }}/>
+                    sx={{ width: 200, height: 200, mt: 2, borderRadius: 2 }} />
 
                 {/* Form Grid */}
                 <Box sx={{ mt: 3 }}>
