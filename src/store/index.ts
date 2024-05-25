@@ -4,17 +4,17 @@ import { create } from 'zustand';
 type UserStore = {
     userId: number;
     userToken: string | null;
-    userImgURL: string;
+    userImgFlag: number;
     setUserId: (id: number) => void;
     setUserToken: (token: string | null) => void;
-    setUserImgURL: (url: string) => void;
+    setUserImgURL: (count: number) => void;
 }
 
 // Default user state
 const defaultUserState: UserStored = {
     userId: -1,
     userToken: '',
-    userImgURL: 'https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png',
+    userImgFlag: 0,
 };
 
 // Local Storage Get & Set
@@ -38,7 +38,7 @@ const useUserStore = create<UserStore>((set) => ({
     // Get user methods
     userId: getLocalStorage('user').userId,
     userToken: getLocalStorage('user').userToken,
-    userImgURL: getLocalStorage('user').userImgURL,
+    userImgFlag: getLocalStorage('user').userImgFlag,
 
     // Set user methods
     setUserId: (id) => set((state) => {
@@ -51,10 +51,10 @@ const useUserStore = create<UserStore>((set) => ({
         setLocalStorage('user', newState);
         return { userToken: token };
     }),
-    setUserImgURL: (url) => set((state) => {
-        const newState = { ...state, userImgURL: url || defaultUserState.userImgURL };
+    setUserImgURL: (count) => set((state) => {
+        const newState = { ...state, userImgFlag: count };
         setLocalStorage('user', newState);
-        return { userImgURL: newState.userImgURL };
+        return { userImgFlag: count };
     }),
 }));
 

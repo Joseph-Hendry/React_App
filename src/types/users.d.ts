@@ -23,7 +23,7 @@ type UserStored = {
      */
     userToken: string;
     /**
-     * User img URL
+     * User img flag
      */
-    userImgURL: string;
+    userImgFlag: number;
 }
