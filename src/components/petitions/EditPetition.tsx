@@ -25,8 +25,11 @@ import {
     DialogActions,
     DialogContent,
     DialogContentText,
-    DialogTitle
+    DialogTitle, Snackbar, Alert
 } from '@mui/material';
+
+// Global Variables
+const validImageTypes = new Set(['image/jpeg', 'image/png', 'image/gif']);
 
 // Title CSS
 const titleStyle: CSS.Properties = {
@@ -48,9 +51,14 @@ const EditPetition = () => {
     const [categoryId, setCategoryId] = useState('');
 
     // Petition Image
-    const [petitionPicture, setPetitionImg] = useState<File | null>(null);
-    const [petitionPictureURL, setPetitionImgURL] = useState('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
-    const [petitionOriginalPictureURL, setPetitionOriginalPictureURL] = useState('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
+    const [petitionImg, setPetitionImg] = useState<File | null>(null);
+    const [petitionImgURL, setPetitionImgURL] = useState('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
+    const [petitionOriginalImgURL, setPetitionOriginalImgURL] = useState('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
+
+    // Valid flags
+    const [titleValid, setTitleValid] = React.useState(true);
+    const [descriptionValid, setDescriptionValid] = React.useState(true);
+    const [imgValid, setImgValid] = React.useState(true);
 
     // Support Tiers
     const [changeSupportTier, updateSupportTier] = useState(0)
@@ -62,11 +70,10 @@ const EditPetition = () => {
     // Dialog
     const [dialogOpen, setDialogOpen] = useState(false);
     const [currentSupportTier, setCurrentSupportTier] = useState({ supportTierId: -1, title: '', description: '', cost: 0 });
-    // const [currentSupportTierIndex, setCurrentSupportTierIndex] = useState<number | null>(null);
 
     // Error Flags
-    const [errorFlag, setErrorFlag] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('Error :(');
+    const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+    const [snackbarMessage, setSnackbarMessage] = React.useState('');
 
     // Gets categories
     useEffect(() => {
@@ -74,10 +81,7 @@ const EditPetition = () => {
             .then((response) => {
                 setCategories(response.data);
             })
-            .catch((error) => {
-                setErrorFlag(true);
-                setErrorMessage(error.toString());
-            });
+            .catch((error) => {});
     }, []);
 
     // Gets petitions details
@@ -90,10 +94,7 @@ const EditPetition = () => {
                 setCategoryId(petition.categoryId.toString());
                 setSupportTiers(petition.supportTiers);
             })
-            .catch((error) => {
-                setErrorFlag(true);
-                setErrorMessage(error.toString());
-            });
+            .catch((error) => {});
     }, [id, userToken, changeSupportTier]);
 
     // Gets petition image
@@ -101,15 +102,10 @@ const EditPetition = () => {
         const getPetitionImg = () => {
             axios.get(`http://localhost:3000/api/v1/petitions/${id}/image`, {responseType: "blob"})
                 .then((response) => {
-                    setErrorFlag(false);
-                    setErrorMessage("");
                     const pictureURL = URL.createObjectURL(response.data);
-                    setPetitionOriginalPictureURL(pictureURL);
+                    setPetitionOriginalImgURL(pictureURL);
                     setPetitionImgURL(pictureURL);
-                }, (error) => {
-                    setErrorFlag(true);
-                    setErrorMessage(error.toString());
-                });
+                }, (error) => {});
         };
         getPetitionImg();
     }, [id]);
@@ -117,17 +113,51 @@ const EditPetition = () => {
 
     // Change petition image
     const handleChangePetitionImg = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (event.target.files && event.target.files[0]) {
-            setPetitionImg(event.target.files[0]);
-            setPetitionImgURL(URL.createObjectURL(event.target.files[0]));
+        // Get file
+        const file = event.target.files?.[0];
+
+        // Check file and extension
+        if (file && validImageTypes.has(file.type)) {
+            setImgValid(true)
+            setPetitionImg(file);
+            setPetitionImgURL(URL.createObjectURL(file));
+        } else {
+            setImgValid(false)
         }
     };
 
     // Revert petition image
     const handleRevertImg = () => {
+        setImgValid(true)
         setPetitionImg(null);
-        setPetitionImgURL(petitionOriginalPictureURL);
+        setPetitionImgURL(petitionOriginalImgURL);
     };
+
+    const handleChangeTitle = (event: React.ChangeEvent<HTMLInputElement>) => {
+        // Get and set value
+        const temp = event.target.value;
+        setTitle(temp);
+
+        // Check if valid
+        if (temp.length > 0) {
+            setTitleValid(true);
+        } else {
+            setTitleValid(false);
+        }
+    }
+
+    const handleChangeDescription = (event: React.ChangeEvent<HTMLInputElement>) => {
+        // Get and set value
+        const temp = event.target.value;
+        setDescription(temp);
+
+        // Check if valid
+        if (temp.length > 0) {
+            setDescriptionValid(true);
+        } else {
+            setDescriptionValid(false);
+        }
+    }
 
     // Change category
     const handleChangeCategory = (event: SelectChangeEvent<typeof categoryId>) => {
@@ -137,7 +167,6 @@ const EditPetition = () => {
     // Edit support tier (open dialog)
     const handleEditSupportTier = (index: number) => {
         setCurrentSupportTier(supportTiers[index]);
-        // setCurrentSupportTierIndex(index);
         setDialogOpen(true);
     };
 
@@ -180,8 +209,17 @@ const EditPetition = () => {
             // Close dialog
             setDialogOpen(false);
         } catch (error) {
-            setErrorFlag(true);
-            setErrorMessage("Error :(");
+            if (axios.isAxiosError(error)) {
+                if (error.response) {
+                    showSnackbar(error.response.statusText);
+                } else if (error.request) {
+                    showSnackbar('No response received from the server.');
+                } else {
+                    showSnackbar('Error: ' + error.message);
+                }
+            } else {
+                showSnackbar('An unexpected error occurred.');
+            }
         }
     };
 
@@ -212,8 +250,17 @@ const EditPetition = () => {
                 const updatedTiers = supportTiers.filter((_, i) => i !== index);
                 setSupportTiers(updatedTiers);
             } catch (error) {
-                setErrorFlag(true);
-                setErrorMessage("Error :(");
+                if (axios.isAxiosError(error)) {
+                    if (error.response) {
+                        showSnackbar(error.response.statusText);
+                    } else if (error.request) {
+                        showSnackbar('No response received from the server.');
+                    } else {
+                        showSnackbar('Error: ' + error.message);
+                    }
+                } else {
+                    showSnackbar('An unexpected error occurred.');
+                }
             }
         } else {
             // Remove support tier from view
@@ -245,11 +292,11 @@ const EditPetition = () => {
             });
 
             // Update picture (if one added)
-            if (petitionPicture) {
-                await axios.put(`http://localhost:3000/api/v1/petitions/${id}/image`, petitionPicture, {
+            if (petitionImg) {
+                await axios.put(`http://localhost:3000/api/v1/petitions/${id}/image`, petitionImg, {
                     headers: {
                         "X-Authorization": userToken,
-                        "Content-Type": petitionPicture.type,
+                        "Content-Type": petitionImg.type,
                     },
                 });
             }
@@ -257,10 +304,29 @@ const EditPetition = () => {
             // Navigate to user petitions page
             navigate("/user/petitions");
         } catch (error) {
-            setErrorFlag(true);
-            setErrorMessage("Error :(");
+            if (axios.isAxiosError(error)) {
+                if (error.response) {
+                    showSnackbar(error.response.statusText);
+                } else if (error.request) {
+                    showSnackbar('No response received from the server.');
+                } else {
+                    showSnackbar('Error: ' + error.message);
+                }
+            } else {
+                showSnackbar('An unexpected error occurred.');
+            }
         }
     };
+
+    const showSnackbar = (message: string) => {
+        setSnackbarMessage(message);
+        setSnackbarOpen(true);
+    };
+
+    const handleCloseSnackbar = () => {
+        setSnackbarOpen(false);
+    };
+
 
     return (
         <Container component="main" maxWidth="sm">
@@ -280,8 +346,15 @@ const EditPetition = () => {
 
                 {/* Petition Image*/}
                 <Avatar
-                    src={petitionPictureURL}
+                    src={petitionImgURL}
                     sx={{ width: 200, height: 200, mt: 2, borderRadius: 2 }} />
+
+                {/* Error Message */}
+                {!imgValid && (
+                    <Typography variant="body2" color="error" sx={{ mt: 1, textAlign: 'center' }}>
+                        Please upload a valid profile image to sign up.
+                    </Typography>
+                )}
 
                 {/* Petition Container */}
                 <Box sx={{ mt: 3 }}>
@@ -323,7 +396,9 @@ const EditPetition = () => {
                                 fullWidth
                                 label="Title"
                                 value={title}
-                                onChange={(e) => setTitle(e.target.value)} />
+                                onChange={handleChangeTitle}
+                                error={!titleValid}
+                                helperText={!titleValid ? 'Title is required.' : ''}/>
                         </Grid>
 
                         {/* Description */}
@@ -334,7 +409,9 @@ const EditPetition = () => {
                                 rows={4}
                                 label="Description"
                                 value={description}
-                                onChange={(e) => setDescription(e.target.value)} />
+                                onChange={handleChangeDescription}
+                                error={!descriptionValid}
+                                helperText={!descriptionValid ? 'Description is required.' : ''}/>
                         </Grid>
 
                         {/* Category */}
@@ -458,13 +535,6 @@ const EditPetition = () => {
                             </Button>
                         </Grid>
                     </Grid>
-
-                    {/* Error flag */}
-                    {errorFlag && (
-                        <Typography variant="body2" color="error">
-                            {errorMessage}
-                        </Typography>
-                    )}
                 </Box>
             </Box>
 
@@ -518,6 +588,17 @@ const EditPetition = () => {
                     <Button onClick={handleSupportTierSave}>Save</Button>
                 </DialogActions>
             </Dialog>
+
+            {/* Snackbar for error messages */}
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={6000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+                <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
+                    {snackbarMessage}
+                </Alert>
+            </Snackbar>
         </Container>
     );
 };
