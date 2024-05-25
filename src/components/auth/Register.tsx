@@ -202,7 +202,7 @@ const Register = () => {
                     Sign up
                 </Typography>
 
-                {/* Icon */}
+                {/* Profile Photo */}
                 <Avatar
                     src={userImgURL}
                     sx={{ width: 100, height: 100, mt: 2 }}
