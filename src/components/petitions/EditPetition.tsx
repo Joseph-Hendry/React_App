@@ -20,41 +20,47 @@ import {
     FormControl,
     CardContent,
     Paper,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle
 } from '@mui/material';
 
 const EditPetition = () => {
 
-    // Petition ID
+    // User and page varibles
     const { id } = useParams();
-
-    // Used for navigation
     const navigate = useNavigate();
-
-    // User information
     const userToken = useUserStore((state) => state.userToken);
 
-    // Petition Form Values
+    // Petition Details
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [categoryId, setCategoryId] = useState('');
 
-    // Petition Picture
-    const [petitionPicture, setPetitionPicture] = useState<File | null>(null);
-    const [petitionPictureURL, setPetitionPictureURL] = useState('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
+    // Petition Image
+    const [petitionPicture, setPetitionImg] = useState<File | null>(null);
+    const [petitionPictureURL, setPetitionImgURL] = useState('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
     const [petitionOriginalPictureURL, setPetitionOriginalPictureURL] = useState('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
 
     // Support Tiers
-    const [deletedSupportTierIds, setDeletedSupportTierIds] = useState([-1])
+    // const [deletedSupportTierIds, setDeletedSupportTierIds] = useState([-1])
     const [supportTiers, setSupportTiers] = useState([{ supportTierId: -1, title: '', description: '', cost: 0 }]);
 
     // Categories
     const [categories, setCategories] = useState<Category[] | null>(null);
 
-    // Error Messages
-    const [errorFlag, setErrorFlag] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('');
+    // Dialog
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [currentSupportTier, setCurrentSupportTier] = useState({ supportTierId: -1, title: '', description: '', cost: 0 });
+    const [currentSupportTierIndex, setCurrentSupportTierIndex] = useState<number | null>(null);
 
-    // Get the list of categories
+    // Error Flags
+    const [errorFlag, setErrorFlag] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('Error :(');
+
+    // Gets categries
     useEffect(() => {
         axios.get('http://localhost:3000/api/v1/petitions/categories')
             .then((response) => {
@@ -66,7 +72,7 @@ const EditPetition = () => {
             });
     }, []);
 
-    // Load petition data
+    // Gets petitions details
     useEffect(() => {
         axios.get(`http://localhost:3000/api/v1/petitions/${id}`)
             .then((response) => {
@@ -82,18 +88,16 @@ const EditPetition = () => {
             });
     }, [id, userToken]);
 
-    // Gets the petition image
-    React.useEffect(() => {
+    // Gets petitino image
+    useEffect(() => {
         const getPetitionImg = () => {
             axios.get(`http://localhost:3000/api/v1/petitions/${id}/image`, {responseType: "blob"})
                 .then((response) => {
                     setErrorFlag(false);
                     setErrorMessage("");
-
-                    // Set picture
                     const pictureURL = URL.createObjectURL(response.data);
                     setPetitionOriginalPictureURL(pictureURL);
-                    setPetitionPictureURL(pictureURL);
+                    setPetitionImgURL(pictureURL);
                 }, (error) => {
                     setErrorFlag(true);
                     setErrorMessage(error.toString());
@@ -102,83 +106,138 @@ const EditPetition = () => {
         getPetitionImg();
     }, [id]);
 
-    // Handle change petition picture
-    const handlePetitionPictureChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+
+    // Change petition image
+    const handleChangePetitionImg = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files[0]) {
-            setPetitionPicture(event.target.files[0]);
-            setPetitionPictureURL(URL.createObjectURL(event.target.files[0]));
+            setPetitionImg(event.target.files[0]);
+            setPetitionImgURL(URL.createObjectURL(event.target.files[0]));
         }
     };
 
-    // Handle revert petition picture
-    const handleRevertPicture = () => {
-        setPetitionPicture(null);
-        setPetitionPictureURL(petitionOriginalPictureURL);
+    // Revert petition image
+    const handleRevertImg = () => {
+        setPetitionImg(null);
+        setPetitionImgURL(petitionOriginalPictureURL);
     };
 
-    // Handles category change
+    // Change category
     const handleChangeCategory = (event: SelectChangeEvent<typeof categoryId>) => {
         setCategoryId(event.target.value);
     };
 
-    // Handle support tier change
-    const handleSupportTierChange = (index: number, field: string, value: string) => {
-        const updatedTiers = supportTiers.map((tier, i) => {
-            if (i === index) {
-                return { ...tier, [field]: field === 'cost' ? parseInt(value, 10) : value };
-            }
-            return tier;
-        });
-        setSupportTiers(updatedTiers);
+    // Edit support tier (open dialog)
+    const handleEditSupportTier = (index: number) => {
+        setCurrentSupportTier(supportTiers[index]);
+        setCurrentSupportTierIndex(index);
+        setDialogOpen(true);
     };
 
-    // Handle adding a new support tiers
+    // Close dialog
+    const handleCloseDialog = () => {
+        setDialogOpen(false);
+    };
+
+    // Change support tier (current editing dialog)
+    const handleChangeSupportTierDialog = (field: string, value: string) => {
+        setCurrentSupportTier({
+            ...currentSupportTier,
+            [field]: field === 'cost' ? parseInt(value, 10) : value
+        });
+    };
+
+    // Save support tier edit
+    const handleSupportTierSave = async () => {
+        if (currentSupportTierIndex !== null) {
+            const updatedTiers = [...supportTiers];
+            updatedTiers[currentSupportTierIndex] = currentSupportTier;
+            setSupportTiers(updatedTiers);
+
+            const { supportTierId, ...supportTierData } = currentSupportTier;
+            try {
+
+                // Add if new support tier
+                if (supportTierId === -1) {
+                    await axios.put(`http://localhost:3000/api/v1/petitions/${id}/supportTiers`, supportTierData, {
+                        headers: {
+                            "X-Authorization": userToken,
+                        },
+                    });
+
+                // Edit if old support tier
+                } else {
+                    await axios.patch(`http://localhost:3000/api/v1/petitions/${id}/supportTiers/${supportTierId}`, supportTierData, {
+                        headers: {
+                            "X-Authorization": userToken,
+                        },
+                    });
+                }
+            } catch (error) {
+                setErrorFlag(true);
+                setErrorMessage("Error :(");
+            }
+        }
+        setDialogOpen(false);
+    };
+
+    // Add new support tier
     const handleAddSupportTier = () => {
         if (supportTiers.length < 3) {
             setSupportTiers([...supportTiers, { supportTierId: -1, title: '', description: '', cost: 0 }]);
         }
     };
 
-    // Handle removing a support tier
-    const handleRemoveSupportTier = (index: number) => {
-        // Add to deleted if it was existing support tier
+    // Remove support tier
+    const handleRemoveSupportTier = async (index: number) => {
+        // Get tier
         const tier = supportTiers[index];
-        if (tier.supportTierId !== -1) {
-            setDeletedSupportTierIds([...deletedSupportTierIds, tier.supportTierId]);
-        }
 
-        // Remove from petitions list
-        if (supportTiers.length > 1) {
+        if (tier.supportTierId !== -1) {
+            try {
+                // Delete if not new
+                await axios.delete(`http://localhost:3000/api/v1/petitions/${id}/supportTiers/${tier.supportTierId}`,  {
+                    headers: {
+                        "X-Authorization": userToken,
+                    },
+                });
+
+                // Remove support tier from view
+                const updatedTiers = supportTiers.filter((_, i) => i !== index);
+                setSupportTiers(updatedTiers);
+            } catch (error) {
+                setErrorFlag(true);
+                setErrorMessage("Error :(");
+            }
+        } else {
+            // Remove support tier from view
             const updatedTiers = supportTiers.filter((_, i) => i !== index);
             setSupportTiers(updatedTiers);
         }
     };
 
-    // Handle cancel
+    // Cancel edit
     const handleCancel = () => {
         navigate("/user/petitions");
     };
 
-    // Handle update
-    const handleUpdate = async () => {
-        // Create request body
+    // Save petition
+    const handleSavePetition = async () => {
+        // Get patch request body
         const updatePetitionRequestBody = {
             title,
             description,
             categoryId: Number(categoryId)
         };
 
-        // TODO: Fix error delete if one petition left
-
         try {
-            // Update petition details
+            // Send patch request
             await axios.patch(`http://localhost:3000/api/v1/petitions/${id}`, updatePetitionRequestBody, {
                 headers: {
                     "X-Authorization": userToken,
                 },
             });
 
-            // Update profile photo if it exists
+            // Update picture (if one added)
             if (petitionPicture) {
                 await axios.put(`http://localhost:3000/api/v1/petitions/${id}/image`, petitionPicture, {
                     headers: {
@@ -188,43 +247,8 @@ const EditPetition = () => {
                 });
             }
 
-            // Delete removed support tiers
-            for (const supportTierId of deletedSupportTierIds) {
-                // eslint-disable-next-line eqeqeq
-                if (supportTierId != -1) {
-                    await axios.delete(`http://localhost:3000/api/v1/petitions/${id}/supportTiers/${supportTierId}`,  {
-                        headers: {
-                            "X-Authorization": userToken,
-                        },
-                    });
-                }
-            }
-
-            // Update & Create new support tiers
-            for (const supportTier of supportTiers) {
-
-                // Get support tier info
-                const { supportTierId, ...supportTierData } = supportTier;
-
-                // Check for put or patch
-                if (supportTierId === -1) {
-                    await axios.put(`http://localhost:3000/api/v1/petitions/${id}/supportTiers`, supportTierData, {
-                        headers: {
-                            "X-Authorization": userToken,
-                        },
-                    });
-                } else {
-                    await axios.patch(`http://localhost:3000/api/v1/petitions/${id}/supportTiers/${supportTierId}`, supportTierData, {
-                        headers: {
-                            "X-Authorization": userToken,
-                        },
-                    });
-                }
-            }
-
-            // Navigate to users petitions
+            // Navigate to user petitions page
             navigate("/user/petitions");
-
         } catch (error) {
             setErrorFlag(true);
             setErrorMessage("Error :(");
@@ -242,21 +266,23 @@ const EditPetition = () => {
                     alignItems: 'center',
                 }}>
 
-                {/* Edit Petition Title */}
+                {/* Title */}
                 <Typography component="h1" variant="h5" sx={{ mt: 2 }}>
                     Edit Petition
                 </Typography>
 
-                {/* Petition Photo */}
+                {/* Petition Image*/}
                 <Avatar
                     src={petitionPictureURL}
-                    sx={{ width: 100, height: 100, mt: 2 }} />
+                    sx={{ width: 200, height: 200, mt: 2, borderRadius: 2 }} />
 
-                {/* Form Grid */}
+                {/* Petition Container */}
                 <Box sx={{ mt: 3 }}>
+
+                    {/* Petition Details */}
                     <Grid container spacing={2} alignItems="baseline">
 
-                        {/* Upload Button */}
+                        {/* Upload Image */}
                         <Grid item xs={6} mb={2}>
                             <Button
                                 fullWidth
@@ -267,19 +293,19 @@ const EditPetition = () => {
                                 <input
                                     type="file"
                                     hidden
-                                    onChange={handlePetitionPictureChange}
+                                    onChange={handleChangePetitionImg}
                                 />
                             </Button>
                         </Grid>
 
-                        {/* Remove Button */}
+                        {/* Revert Image */}
                         <Grid item xs={6} mb={2}>
                             <Button
                                 fullWidth
                                 variant="outlined"
                                 color="error"
                                 component="label"
-                                onClick={handleRevertPicture}>
+                                onClick={handleRevertImg}>
                                 Revert
                             </Button>
                         </Grid>
@@ -333,11 +359,13 @@ const EditPetition = () => {
                     {/* Support Tiers */}
                     <Paper sx={{ mt: 3 }} elevation={6}>
                         <CardContent>
+
+                            {/* Container for each support tier */}
                             <Grid container spacing={2}>
                                 {supportTiers.map((tier, index) => (
                                     <React.Fragment key={index}>
 
-                                        {/* Support Tier Title */}
+                                        {/* Heading */}
                                         <Grid item xs={12}>
                                             <Typography variant="h6">Support Tier {index + 1}</Typography>
                                         </Grid>
@@ -345,82 +373,89 @@ const EditPetition = () => {
                                         {/* Title */}
                                         <Grid item xs={12}>
                                             <TextField
-                                                required
                                                 fullWidth
+                                                disabled
                                                 label="Title"
-                                                value={tier.title}
-                                                onChange={(e) => handleSupportTierChange(index, 'title', e.target.value)} />
+                                                value={tier.title}/>
                                         </Grid>
 
                                         {/* Description */}
                                         <Grid item xs={12}>
                                             <TextField
-                                                required
                                                 fullWidth
                                                 multiline
+                                                disabled
                                                 rows={2}
                                                 label="Description"
-                                                value={tier.description}
-                                                onChange={(e) => handleSupportTierChange(index, 'description', e.target.value)} />
+                                                value={tier.description}/>
                                         </Grid>
 
                                         {/* Cost */}
                                         <Grid item xs={12}>
                                             <TextField
-                                                required
                                                 fullWidth
+                                                disabled
                                                 label="Cost"
                                                 type="number"
-                                                value={tier.cost}
-                                                onChange={(e) => handleSupportTierChange(index, 'cost', e.target.value)} />
+                                                value={tier.cost}/>
                                         </Grid>
 
-                                        {/* Remove Support Tier */}
-                                        <Grid item xs={12}>
+                                        {/* Edit */}
+                                        <Grid item xs={6}>
+                                            <Button
+                                                fullWidth
+                                                variant="outlined"
+                                                onClick={() => handleEditSupportTier(index)}>
+                                                Edit
+                                            </Button>
+                                        </Grid>
+
+                                        {/* Remove */}
+                                        <Grid item xs={6}>
                                             <Button
                                                 fullWidth
                                                 variant="outlined"
                                                 color="error"
                                                 onClick={() => handleRemoveSupportTier(index)}>
-                                                Remove Tier
+                                                Remove
                                             </Button>
                                         </Grid>
                                     </React.Fragment>
                                 ))}
-
-                                {/* Add Support Tier */}
-                                {supportTiers.length < 3 && (
-                                    <Grid item xs={12}>
-                                        <Button
-                                            fullWidth
-                                            variant="outlined"
-                                            onClick={handleAddSupportTier}>
-                                            Add Support Tier
-                                        </Button>
-                                    </Grid>
-                                )}
                             </Grid>
                         </CardContent>
                     </Paper>
 
-                    {/* Container for Cancel & Submit */}
-                    <Grid container spacing={2} mt={3} mb={10}>
-                        {/* Cancel Button */}
+                    <Grid container spacing={2} mt={1} mb={10}>
+
+                        {/* Add Support Tier*/}
+                        {supportTiers.length < 3 && (
+                            <Grid item xs={12} mb={2}>
+                                <Button
+                                    fullWidth
+                                    variant="outlined"
+                                    onClick={handleAddSupportTier}>
+                                    Add Support Tier
+                                </Button>
+                            </Grid>
+                        )}
+
+                        {/* Cancel */}
                         <Grid item xs={12} sm={6}>
                             <Button fullWidth variant="outlined" onClick={handleCancel}>
                                 Cancel
                             </Button>
                         </Grid>
 
-                        {/* Save Button */}
+                        {/* Save */}
                         <Grid item xs={12} sm={6}>
-                            <Button fullWidth variant="contained" onClick={handleUpdate}>
+                            <Button fullWidth variant="contained" onClick={handleSavePetition}>
                                 Save
                             </Button>
                         </Grid>
                     </Grid>
 
-                    {/* Error Flag */}
+                    {/* Error flag */}
                     {errorFlag && (
                         <Typography variant="body2" color="error">
                             {errorMessage}
@@ -428,6 +463,57 @@ const EditPetition = () => {
                     )}
                 </Box>
             </Box>
+
+            {/* Dialog Box */}
+            <Dialog open={dialogOpen} onClose={handleCloseDialog}>
+
+                {/* Title */}
+                <DialogTitle>Edit Support Tier</DialogTitle>
+                <DialogContent>
+
+                    {/* Text */}
+                    <DialogContentText>
+                        Update the details of the support tier below.
+                    </DialogContentText>
+
+                    {/* Title */}
+                    <TextField
+                        margin="dense"
+                        label="Title"
+                        fullWidth
+                        value={currentSupportTier.title}
+                        onChange={(e) => handleChangeSupportTierDialog('title', e.target.value)}/>
+
+                    {/* Description */}
+                    <TextField
+                        margin="dense"
+                        label="Description"
+                        fullWidth
+                        multiline
+                        rows={2}
+                        value={currentSupportTier.description}
+                        onChange={(e) => handleChangeSupportTierDialog('description', e.target.value)}/>
+
+                    {/* Cost */}
+                    <TextField
+                        margin="dense"
+                        label="Cost"
+                        type="number"
+                        fullWidth
+                        value={currentSupportTier.cost}
+                        onChange={(e) => handleChangeSupportTierDialog('cost', e.target.value)}/>
+                </DialogContent>
+
+                {/* Buttons */}
+                <DialogActions>
+
+                    {/* Cancel */}
+                    <Button onClick={handleCloseDialog} color={'error'}>Cancel</Button>
+
+                    {/* Save */}
+                    <Button onClick={handleSupportTierSave}>Save</Button>
+                </DialogActions>
+            </Dialog>
         </Container>
     );
 };
