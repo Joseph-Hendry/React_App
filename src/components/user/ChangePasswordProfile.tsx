@@ -14,7 +14,7 @@ import {
     Container,
     CssBaseline,
     Box,
-    Grid,
+    Grid, Snackbar, Alert,
 } from '@mui/material';
 
 const ChangePasswordProfile = () => {
@@ -26,20 +26,31 @@ const ChangePasswordProfile = () => {
     const userId = useUserStore((state) => state.userId);
     const userToken = useUserStore((state) => state.userToken);
 
-    // Error flags
-    const [errorFlag, setErrorFlag] = React.useState(false);
-    const [errorMessage, setErrorMessage] = React.useState('');
-
     // Form variables
     const [password, setPassword] = React.useState('');
     const [currentPassword, setCurrentPassword] = React.useState('');
     const [showNewPassword, setShowNewPassword] = React.useState(false);
     const [showOldPassword, setShowOldPassword] = React.useState(false);
 
+    // Error flags
+    const [passwordValid, setPasswordValid] = React.useState(false);
+    const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+    const [snackbarMessage, setSnackbarMessage] = React.useState('');
 
     // Handle show/hide password
     const handleClickShowNewPassword = () => setShowNewPassword((show) => !show);
     const handleClickShowOldPassword = () => setShowOldPassword((show) => !show);
+
+    const handleChangePassword = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const temp = event.target.value;
+        setPassword(temp)
+
+        if (temp.length >= 6) {
+            setPasswordValid(true);
+        } else {
+            setPasswordValid(false);
+        }
+    }
 
     // Handle cancel
     const handleCancel = () => {
@@ -65,8 +76,27 @@ const ChangePasswordProfile = () => {
             navigate('/user/profile');
 
         } catch (error) {
-            setErrorFlag(true);
+            if (axios.isAxiosError(error)) {
+                if (error.response) {
+                    showSnackbar(error.response.statusText);
+                } else if (error.request) {
+                    showSnackbar('No response received from the server.');
+                } else {
+                    showSnackbar('Error: ' + error.message);
+                }
+            } else {
+                showSnackbar('An unexpected error occurred.');
+            }
         }
+    };
+
+    const showSnackbar = (message: string) => {
+        setSnackbarMessage(message);
+        setSnackbarOpen(true);
+    };
+
+    const handleCloseSnackbar = () => {
+        setSnackbarOpen(false);
     };
 
     return (
@@ -97,7 +127,9 @@ const ChangePasswordProfile = () => {
                                 label="New Password"
                                 type={showNewPassword ? 'text' : 'password'}
                                 value={password}
-                                onChange={(e) => setPassword(e.target.value)}
+                                onChange={handleChangePassword}
+                                error={!passwordValid}
+                                helperText={!passwordValid ? 'Password must be at least 6 characters.' : ''}
                                 InputProps={{
                                     endAdornment: (
                                         <InputAdornment position="end">
@@ -151,16 +183,20 @@ const ChangePasswordProfile = () => {
                                 Save
                             </Button>
                         </Grid>
-
                     </Grid>
-
-                    {errorFlag && (
-                        <Typography variant="body2" color="error">
-                            There's an error :(
-                        </Typography>
-                    )}
                 </Box>
             </Box>
+
+            {/* Snackbar for error messages */}
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={6000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+                <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
+                    {snackbarMessage}
+                </Alert>
+            </Snackbar>
         </Container>
     );
 };
