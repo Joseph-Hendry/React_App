@@ -59,6 +59,9 @@ const EditPetition = () => {
     const [titleValid, setTitleValid] = React.useState(true);
     const [descriptionValid, setDescriptionValid] = React.useState(true);
     const [imgValid, setImgValid] = React.useState(true);
+    const [supportTitleValid, setSupportTitleValid] = React.useState(true);
+    const [supportDescriptionValid, setSupportDescriptionValid] = React.useState(true);
+    const [supportCostValid, setSupportCostValid] = React.useState(true);
 
     // Support Tiers
     const [changeSupportTier, updateSupportTier] = useState(0)
@@ -181,6 +184,26 @@ const EditPetition = () => {
             ...currentSupportTier,
             [field]: field === 'cost' ? parseInt(value, 10) : value
         });
+
+        if (field === 'title') {
+            if (value.length > 0) {
+                setSupportTitleValid(true);
+            } else {
+                setSupportTitleValid(false);
+            }
+        } else if (field === 'description') {
+            if (value.length > 0) {
+                setSupportDescriptionValid(true);
+            } else {
+                setSupportDescriptionValid(false);
+            }
+        } else if (field === 'cost') {
+            if (!isNaN(parseInt(value, 10))) {
+                setSupportCostValid(true);
+            } else {
+                setSupportCostValid(false);
+            }
+        }
     };
 
     // Save support tier edit
@@ -556,7 +579,9 @@ const EditPetition = () => {
                         label="Title"
                         fullWidth
                         value={currentSupportTier.title}
-                        onChange={(e) => handleChangeSupportTierDialog('title', e.target.value)}/>
+                        onChange={(e) => handleChangeSupportTierDialog('title', e.target.value)}
+                        error={!supportTitleValid}
+                        helperText={!supportTitleValid ? 'Title is required.' : ''}/>
 
                     {/* Description */}
                     <TextField
@@ -566,7 +591,9 @@ const EditPetition = () => {
                         multiline
                         rows={2}
                         value={currentSupportTier.description}
-                        onChange={(e) => handleChangeSupportTierDialog('description', e.target.value)}/>
+                        onChange={(e) => handleChangeSupportTierDialog('description', e.target.value)}
+                        error={!supportDescriptionValid}
+                        helperText={!supportDescriptionValid ? 'Description is required.' : ''}/>
 
                     {/* Cost */}
                     <TextField
@@ -575,7 +602,9 @@ const EditPetition = () => {
                         type="number"
                         fullWidth
                         value={currentSupportTier.cost}
-                        onChange={(e) => handleChangeSupportTierDialog('cost', e.target.value)}/>
+                        onChange={(e) => handleChangeSupportTierDialog('cost', e.target.value)}
+                        error={!supportCostValid}
+                        helperText={!supportCostValid ? 'Cost is required.' : ''}/>
                 </DialogContent>
 
                 {/* Buttons */}
