@@ -25,5 +25,5 @@ type UserStored = {
     /**
      * User img flag
      */
-    userImgFlag: number;
+    userChangeFlag: number;
 }

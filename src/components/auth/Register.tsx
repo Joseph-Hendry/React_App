@@ -23,7 +23,6 @@ const Register = () => {
     // User information
     const setUserId = useUserStore((state) => state.setUserId);
     const setUserToken = useUserStore((state) => state.setUserToken);
-    const setUserImgURL = useUserStore((state) => state.setUserImgURL);
 
     // Form values
     const [firstName, setFirstName] = React.useState("");
@@ -92,7 +91,6 @@ const Register = () => {
                         "Content-Type": profilePicture.type
                     },
                 });
-                setUserImgURL(profilePictureURL);
             }
 
             // Navigate to profile page

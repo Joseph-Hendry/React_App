@@ -22,8 +22,8 @@ const EditProfile = () => {
     // User information
     const userId = useUserStore((state) => state.userId);
     const userToken = useUserStore((state) => state.userToken);
-    const userImgURL = useUserStore((state) => state.userImgURL);
-    const setUserImgURL = useUserStore((state) => state.setUserImgURL);
+    const userChangeFlag = useUserStore((state) => state.userChangeFlag);
+    const setUserChangeFlag = useUserStore((state) => state.setUserChangeFlag);
 
     // Form variables
     const [firstName, setFirstName] = React.useState('');
@@ -31,15 +31,15 @@ const EditProfile = () => {
     const [email, setEmail] = React.useState('');
 
     // Profile photo
-    const [profilePicture, setProfilePicture] = React.useState<File | null>(null);
-    const [profilePictureURL, setProfilePictureURL] = React.useState(userImgURL);
-    const [profilePictureRemoved, setProfilePictureRemoved] = React.useState(false);
+    const [userImg, setUserImg] = React.useState<File | null>(null);
+    const [userImgURL, setUserImgURL] = React.useState('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
+    const [userImgRemoved, setUserImgRemoved] = React.useState(false);
 
     // Error flags
     const [errorFlag, setErrorFlag] = React.useState(false);
     const [errorMessage, setErrorMessage] = React.useState('');
 
-    // Get user's current information
+    // Get user information
     React.useEffect(() => {
         const getUser = async () => {
             try {
@@ -62,25 +62,41 @@ const EditProfile = () => {
         getUser();
     }, [userId, userToken]);
 
+    // Get user image
+    React.useEffect(() => {
+        const getUserImg = () => {
+            axios.get(`http://localhost:3000/api/v1/users/${userId}/image`, { responseType: "blob" })
+                .then((response) => {
+                    setErrorFlag(false);
+                    setErrorMessage("");
+                    setUserImgURL(URL.createObjectURL(response.data));
+                }, (error) => {
+                    setUserImgURL('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
+                });
+        };
+        getUserImg();
+    }, [userId, userToken, userChangeFlag]);
+
     // Handle profile picture change
     const handleProfilePictureChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         // Add file if valid
         if (event.target.files && event.target.files[0]) {
             // Set not removed
-            setProfilePictureRemoved(false);
+            setUserImgRemoved(false);
 
             // Set File
-            setProfilePicture(event.target.files[0]);
-            setProfilePictureURL(URL.createObjectURL(event.target.files[0]));
+            setUserImg(event.target.files[0]);
+            setUserImgURL(URL.createObjectURL(event.target.files[0]));
         }
     };
 
     // Handle remove profile picture
     const handleRemove = () => {
-        if (userImgURL !== 'https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png')
-            setProfilePictureRemoved(true);
-            setProfilePicture(null)
-            setProfilePictureURL('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
+        if (userImgURL !== 'https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png') {
+            setUserImgRemoved(true);
+            setUserImg(null);
+            setUserImgURL('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
+        }
     };
 
     // Handle cancel
@@ -105,17 +121,17 @@ const EditProfile = () => {
             });
 
             // Upload profile photo if selected
-            if (profilePicture) {
-                await axios.put(`http://localhost:3000/api/v1/users/${userId}/image`, profilePicture, {
+            if (userImg) {
+                await axios.put(`http://localhost:3000/api/v1/users/${userId}/image`, userImg, {
                     headers: {
                         'X-Authorization': userToken,
-                        'Content-Type': profilePicture.type,
+                        'Content-Type': userImg.type,
                     },
                 });
-                setUserImgURL(profilePictureURL);
+                setUserImgURL(userImgURL);
 
             // Delete photo if removed
-            } else if (profilePictureRemoved) {
+            } else if (userImgRemoved) {
                 await axios.delete(`http://localhost:3000/api/v1/users/${userId}/image`, {
                     headers: {
                         'X-Authorization': userToken
@@ -123,6 +139,9 @@ const EditProfile = () => {
                 });
                 setUserImgURL('');
             }
+
+            // Update user
+            setUserChangeFlag(userChangeFlag + 1);
 
             // Navigate to profile page
             navigate('/user/profile');
@@ -150,7 +169,7 @@ const EditProfile = () => {
 
                 {/* Profile Photo */}
                 <Avatar
-                    src={profilePictureURL}
+                    src={userImgURL}
                     sx={{ width: 100, height: 100, mt:2 }}/>
 
                 {/* Form Grid */}

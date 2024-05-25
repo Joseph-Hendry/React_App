@@ -11,6 +11,7 @@ import {
     Menu,
     MenuItem, Avatar, Tooltip
 } from "@mui/material";
+import axios from "axios";
 
 const Appbar = () => {
 
@@ -18,11 +19,14 @@ const Appbar = () => {
     const navigate = useNavigate();
 
     // User information
+    const userId = useUserStore((state) => state.userId);
     const userToken = useUserStore((state) => state.userToken);
-    const userImgURL = useUserStore((state) => state.userImgURL);
+    const userChangeFlag = useUserStore((state) => state.userChangeFlag);
     const setUserId = useUserStore((state) => state.setUserId);
     const setUserToken = useUserStore((state) => state.setUserToken);
-    const setUserImgURL = useUserStore((state) => state.setUserImgURL);
+
+    // User image
+    const [userImgURL, setUserImgURL] = React.useState('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
 
     // Menu Items
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
@@ -30,6 +34,21 @@ const Appbar = () => {
     // Error flags
     const [errorFlag, setErrorFlag] = React.useState(false);
     const [errorMessage, setErrorMessage] = React.useState("");
+
+    // Get user image
+    React.useEffect(() => {
+        const getUserImg = () => {
+            axios.get(`http://localhost:3000/api/v1/users/${userId}/image`, { responseType: "blob" })
+                .then((response) => {
+                    setErrorFlag(false);
+                    setErrorMessage("");
+                    setUserImgURL(URL.createObjectURL(response.data));
+                }, (error) => {
+                    setUserImgURL('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
+                });
+        };
+        getUserImg();
+    }, [userId, userToken, userChangeFlag]);
 
     // Handles petitions button
     const handlePetitions = () => {
@@ -57,7 +76,6 @@ const Appbar = () => {
         setAnchorElUser(null);
         setUserId(-1);
         setUserToken(null);
-        setUserImgURL('')
         navigate('/auth/login');
     };
 

@@ -17,10 +17,11 @@ const Profile = () => {
     // User information
     const userId = useUserStore((state) => state.userId);
     const userToken = useUserStore((state) => state.userToken);
-    const userImgFlag = useUserStore((state) => state.userImgFlag);
+    const userChangeFlag = useUserStore((state) => state.userChangeFlag);
 
     // Form Variables
     const [user, setUser] = React.useState<User | null>()
+    const [userImgURL, setUserImgURL] = React.useState("https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png")
 
     // Error flags
     const [errorFlag, setErrorFlag] = React.useState(false);
@@ -39,9 +40,23 @@ const Profile = () => {
                     setErrorMessage(error.toString());
                 });
         };
-
         getUser();
-    }, [userId, userToken]);
+    }, [userId, userToken, userChangeFlag]);
+
+    // Get user image
+    React.useEffect(() => {
+        const getUserImg = () => {
+            axios.get(`http://localhost:3000/api/v1/users/${userId}/image`, { responseType: "blob" })
+                .then((response) => {
+                    setErrorFlag(false);
+                    setErrorMessage("");
+                    setUserImgURL(URL.createObjectURL(response.data));
+                }, (error) => {
+                    setUserImgURL('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
+                });
+        };
+        getUserImg();
+    }, [userId, userToken, userChangeFlag]);
 
     return (
         <>

@@ -4,17 +4,17 @@ import { create } from 'zustand';
 type UserStore = {
     userId: number;
     userToken: string | null;
-    userImgFlag: number;
+    userChangeFlag: number;
     setUserId: (id: number) => void;
     setUserToken: (token: string | null) => void;
-    setUserImgURL: (count: number) => void;
+    setUserChangeFlag: (count: number) => void;
 }
 
 // Default user state
 const defaultUserState: UserStored = {
     userId: -1,
     userToken: '',
-    userImgFlag: 0,
+    userChangeFlag: 0,
 };
 
 // Local Storage Get & Set
@@ -38,7 +38,7 @@ const useUserStore = create<UserStore>((set) => ({
     // Get user methods
     userId: getLocalStorage('user').userId,
     userToken: getLocalStorage('user').userToken,
-    userImgFlag: getLocalStorage('user').userImgFlag,
+    userChangeFlag: getLocalStorage('user').userChangeFlag,
 
     // Set user methods
     setUserId: (id) => set((state) => {
@@ -51,10 +51,10 @@ const useUserStore = create<UserStore>((set) => ({
         setLocalStorage('user', newState);
         return { userToken: token };
     }),
-    setUserImgURL: (count) => set((state) => {
-        const newState = { ...state, userImgFlag: count };
+    setUserChangeFlag: (count) => set((state) => {
+        const newState = { ...state, userChangeFlag: count };
         setLocalStorage('user', newState);
-        return { userImgFlag: count };
+        return { userChangeFlag: count };
     }),
 }));
 

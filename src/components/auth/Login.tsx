@@ -19,19 +19,19 @@ const Login = () => {
     // For navigation
     const navigate = useNavigate();
 
-    // Error flags
-    const [errorFlag, setErrorFlag] = React.useState(false);
-    const [errorMessage, setErrorMessage] = React.useState("");
+    // User information
+    const setUserId = useUserStore((state) => state.setUserId);
+    const setUserToken = useUserStore((state) => state.setUserToken)
+    // const setUserImgURL = useUserStore((state) => state.setUserImgFlag);
 
     // Form values
     const [email, setEmail] = React.useState("");
     const [password, setPassword] = React.useState("");
     const [showPassword, setShowPassword] = React.useState(false);
 
-    // User information
-    const setUserId = useUserStore((state) => state.setUserId);
-    const setUserToken = useUserStore((state) => state.setUserToken)
-    const setUserImgURL = useUserStore((state) => state.setUserImgURL);
+    // Error flags
+    const [errorFlag, setErrorFlag] = React.useState(false);
+    const [errorMessage, setErrorMessage] = React.useState("");
 
     // Hides the password
     const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -45,14 +45,6 @@ const Login = () => {
             // Set user data
             setUserId(responseLogin.data.userId);
             setUserToken(responseLogin.data.token);
-
-            try {
-                // Get user image
-                const responseImg = await axios.get(`http://localhost:3000/api/v1/users/${responseLogin.data.userId}/image`, { responseType: "blob" });
-
-                // Set user image
-                setUserImgURL(URL.createObjectURL(responseImg.data));
-            } catch (imageError) {}
 
         } catch (error) {
             console.error('An error occurred during login:', error);
