@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { useUserStore } from '../../store';
+import CSS from 'csstype';
 import { SelectChangeEvent } from '@mui/material/Select';
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import {
@@ -26,6 +27,13 @@ import {
     DialogContentText,
     DialogTitle
 } from '@mui/material';
+
+// Title CSS
+const titleStyle: CSS.Properties = {
+    color: "#333",
+    fontWeight: "bold",
+    textTransform: "uppercase",
+};
 
 const EditPetition = () => {
 
@@ -267,8 +275,8 @@ const EditPetition = () => {
                 }}>
 
                 {/* Title */}
-                <Typography component="h1" variant="h5" sx={{ mt: 2 }}>
-                    Edit Petition
+                <Typography variant="h4" style={titleStyle}>
+                    Edit Petitions
                 </Typography>
 
                 {/* Petition Image*/}
@@ -313,7 +321,6 @@ const EditPetition = () => {
                         {/* Title */}
                         <Grid item xs={12}>
                             <TextField
-                                required
                                 fullWidth
                                 label="Title"
                                 value={title}
@@ -323,7 +330,6 @@ const EditPetition = () => {
                         {/* Description */}
                         <Grid item xs={12}>
                             <TextField
-                                required
                                 fullWidth
                                 multiline
                                 rows={4}
@@ -340,7 +346,6 @@ const EditPetition = () => {
                                     fullWidth
                                     labelId="categories-label"
                                     id="select-category"
-                                    required
                                     value={categoryId}
                                     label="Category"
                                     onChange={handleChangeCategory}
