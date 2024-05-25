@@ -37,7 +37,7 @@ const titleStyle: CSS.Properties = {
 
 const EditPetition = () => {
 
-    // User and page varibles
+    // User and page variables
     const { id } = useParams();
     const navigate = useNavigate();
     const userToken = useUserStore((state) => state.userToken);
@@ -53,7 +53,7 @@ const EditPetition = () => {
     const [petitionOriginalPictureURL, setPetitionOriginalPictureURL] = useState('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
 
     // Support Tiers
-    // const [deletedSupportTierIds, setDeletedSupportTierIds] = useState([-1])
+    const [changeSupportTier, updateSupportTier] = useState(0)
     const [supportTiers, setSupportTiers] = useState([{ supportTierId: -1, title: '', description: '', cost: 0 }]);
 
     // Categories
@@ -62,7 +62,7 @@ const EditPetition = () => {
     // Dialog
     const [dialogOpen, setDialogOpen] = useState(false);
     const [currentSupportTier, setCurrentSupportTier] = useState({ supportTierId: -1, title: '', description: '', cost: 0 });
-    const [currentSupportTierIndex, setCurrentSupportTierIndex] = useState<number | null>(null);
+    // const [currentSupportTierIndex, setCurrentSupportTierIndex] = useState<number | null>(null);
 
     // Error Flags
     const [errorFlag, setErrorFlag] = useState(false);
@@ -94,9 +94,9 @@ const EditPetition = () => {
                 setErrorFlag(true);
                 setErrorMessage(error.toString());
             });
-    }, [id, userToken]);
+    }, [id, userToken, changeSupportTier]);
 
-    // Gets petitino image
+    // Gets petition image
     useEffect(() => {
         const getPetitionImg = () => {
             axios.get(`http://localhost:3000/api/v1/petitions/${id}/image`, {responseType: "blob"})
@@ -137,7 +137,7 @@ const EditPetition = () => {
     // Edit support tier (open dialog)
     const handleEditSupportTier = (index: number) => {
         setCurrentSupportTier(supportTiers[index]);
-        setCurrentSupportTierIndex(index);
+        // setCurrentSupportTierIndex(index);
         setDialogOpen(true);
     };
 
@@ -156,42 +156,41 @@ const EditPetition = () => {
 
     // Save support tier edit
     const handleSupportTierSave = async () => {
-        if (currentSupportTierIndex !== null) {
-            const updatedTiers = [...supportTiers];
-            updatedTiers[currentSupportTierIndex] = currentSupportTier;
-            setSupportTiers(updatedTiers);
-
-            const { supportTierId, ...supportTierData } = currentSupportTier;
-            try {
-
-                // Add if new support tier
-                if (supportTierId === -1) {
-                    await axios.put(`http://localhost:3000/api/v1/petitions/${id}/supportTiers`, supportTierData, {
-                        headers: {
-                            "X-Authorization": userToken,
-                        },
-                    });
-
+        const { supportTierId, ...supportTierData } = currentSupportTier;
+        try {
+            // Add if new support tier
+            if (supportTierId === -1) {
+                await axios.put(`http://localhost:3000/api/v1/petitions/${id}/supportTiers`, supportTierData, {
+                    headers: {
+                        "X-Authorization": userToken,
+                    },
+                });
                 // Edit if old support tier
-                } else {
-                    await axios.patch(`http://localhost:3000/api/v1/petitions/${id}/supportTiers/${supportTierId}`, supportTierData, {
-                        headers: {
-                            "X-Authorization": userToken,
-                        },
-                    });
-                }
-            } catch (error) {
-                setErrorFlag(true);
-                setErrorMessage("Error :(");
+            } else {
+                await axios.patch(`http://localhost:3000/api/v1/petitions/${id}/supportTiers/${supportTierId}`, supportTierData, {
+                    headers: {
+                        "X-Authorization": userToken,
+                    },
+                });
             }
+
+            // Update petition data
+            updateSupportTier(changeSupportTier + 1);
+
+            // Close dialog
+            setDialogOpen(false);
+        } catch (error) {
+            setErrorFlag(true);
+            setErrorMessage("Error :(");
         }
-        setDialogOpen(false);
     };
 
     // Add new support tier
     const handleAddSupportTier = () => {
         if (supportTiers.length < 3) {
-            setSupportTiers([...supportTiers, { supportTierId: -1, title: '', description: '', cost: 0 }]);
+            setCurrentSupportTier({supportTierId: -1, title: '', description: '', cost: 0});
+            // setCurrentSupportTierIndex(index);
+            setDialogOpen(true);
         }
     };
 
