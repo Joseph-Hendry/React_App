@@ -7,6 +7,7 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import GroupsIcon from '@mui/icons-material/Groups';
 import HandshakeIcon from '@mui/icons-material/Handshake';
 import {
+    Alert,
     Avatar, Button,
     Card,
     CardMedia,
@@ -16,7 +17,7 @@ import {
     DialogContent,
     DialogTitle, Divider,
     Grid,
-    Paper,
+    Paper, Snackbar,
     Typography
 } from '@mui/material';
 import Box from "@mui/material/Box";
@@ -69,21 +70,16 @@ const PetitionDetail = () => {
     const [message, setMessage] = React.useState('');
 
     // Error flags
-    const [errorFlag, setErrorFlag] = React.useState(false);
-    const [errorMessage, setErrorMessage] = React.useState("");
+    const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+    const [snackbarMessage, setSnackbarMessage] = React.useState('');
 
     // Get the petition
     React.useEffect(() => {
         const getPetition = () => {
             axios.get(`http://localhost:3000/api/v1/petitions/${id}`)
                 .then((response) => {
-                    setErrorFlag(false);
-                    setErrorMessage("");
                     setPetition(response.data);
-                }, (error) => {
-                    setErrorFlag(true);
-                    setErrorMessage(error.toString());
-                });
+                }, (error) => {});
         };
         getPetition();
     }, [id]);
@@ -93,13 +89,8 @@ const PetitionDetail = () => {
         const getPetitionImg = () => {
             axios.get(`http://localhost:3000/api/v1/petitions/${id}/image`, {responseType: "blob"})
                 .then((response) => {
-                    setErrorFlag(false);
-                    setErrorMessage("");
                     setPetitionImageURL(URL.createObjectURL(response.data));
-                }, (error) => {
-                    setErrorFlag(true);
-                    setErrorMessage(error.toString());
-                });
+                }, (error) => {});
         };
         getPetitionImg();
     }, [id]);
@@ -109,13 +100,8 @@ const PetitionDetail = () => {
         const getPetitions = () => {
             axios.get('http://localhost:3000/api/v1/petitions/categories')
                 .then((response) => {
-                    setErrorFlag(false);
-                    setErrorMessage("");
                     setCategories(response.data);
-                }, (error) => {
-                    setErrorFlag(true);
-                    setErrorMessage(error.toString());
-                });
+                }, (error) => {});
         };
         getPetitions();
     }, []);
@@ -125,13 +111,8 @@ const PetitionDetail = () => {
         const getPetitionOwnerImg = () => {
             axios.get(`http://localhost:3000/api/v1/users/${petition?.ownerId}/image`, {responseType: "blob"})
                 .then((response) => {
-                    setErrorFlag(false);
-                    setErrorMessage("");
                     setPetitionOwnerImageURL(URL.createObjectURL(response.data));
-                }, (error) => {
-                    setErrorFlag(true);
-                    setErrorMessage(error.toString());
-                });
+                }, (error) => {});
         };
 
         if (petition?.ownerId) {
@@ -204,11 +185,7 @@ const PetitionDetail = () => {
                 // Set petitions
                 setPetitions(similarPetitionsC);
 
-            } catch (error) {
-                setErrorFlag(true);
-                // @ts-ignore
-                // console.error(error.response.statusText);
-            }
+            } catch (error) {}
         }
 
         if (petition?.categoryId) {
@@ -217,16 +194,45 @@ const PetitionDetail = () => {
     }, [petition?.categoryId, petition?.ownerId, petition?.petitionId]);
 
     // Supports a petition
-    const supportPetition = () => {
-        axios.post(`http://localhost:3000/api/v1/petitions/${id}/supporters`, { "supportTierId": selectedSupportTierId, message }, {headers: { "X-Authorization": userToken }})
-            .then(() => {
-                // Handle success
-                setOpen(false);
-            })
-            .catch((error) => {
-                // Handle error
-                console.error(error.response.statusText);
-            });
+    const supportPetition = async () => {
+        try {
+            // Send request
+            await axios.post(`http://localhost:3000/api/v1/petitions/${id}/supporters`, {
+                supportTierId: selectedSupportTierId,
+                message: message ? message : undefined,
+            }, {headers: {"X-Authorization": userToken}});
+
+            // Close dialog box
+            setOpen(false);
+
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                if (error.response) {
+                    const statusCode = error.response.status;
+
+                    if (statusCode === 401) {
+                        showSnackbar("Please login to support a petition.");
+                    } else {
+                        showSnackbar(error.response.statusText);
+                    }
+                } else if (error.request) {
+                    showSnackbar('No response received from the server.');
+                } else {
+                    showSnackbar('Error: ' + error.message);
+                }
+            } else {
+                showSnackbar('An unexpected error occurred.');
+            }
+        }
+    };
+
+    const showSnackbar = (message: string) => {
+        setSnackbarMessage(message);
+        setSnackbarOpen(true);
+    };
+
+    const handleCloseSnackbar = () => {
+        setSnackbarOpen(false);
     };
 
     // Handles open dialog
@@ -287,9 +293,8 @@ const PetitionDetail = () => {
                     {/* Left side with the image */}
                     <CardMedia
                         component="img"
-                        sx={{ width: 450 }}
+                        sx={{ width: 450, height: 450 }}
                         image={petitionImageURL}
-                        alt="Auction hero"
                     />
 
                     <Box sx={{ marginLeft: 1 }} >
@@ -436,6 +441,17 @@ const PetitionDetail = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            {/* Snackbar for error messages */}
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={6000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+                <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
+                    {snackbarMessage}
+                </Alert>
+            </Snackbar>
         </>
     )
 }
