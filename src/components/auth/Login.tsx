@@ -11,7 +11,7 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { useUserStore } from "../../store";
 import axios from "axios";
-import {IconButton, InputAdornment} from "@mui/material";
+import {Alert, IconButton, InputAdornment, Snackbar} from "@mui/material";
 import {Visibility, VisibilityOff} from "@mui/icons-material";
 
 const Login = () => {
@@ -22,7 +22,6 @@ const Login = () => {
     // User information
     const setUserId = useUserStore((state) => state.setUserId);
     const setUserToken = useUserStore((state) => state.setUserToken)
-    // const setUserImgURL = useUserStore((state) => state.setUserImgFlag);
 
     // Form values
     const [email, setEmail] = React.useState("");
@@ -30,8 +29,8 @@ const Login = () => {
     const [showPassword, setShowPassword] = React.useState(false);
 
     // Error flags
-    const [errorFlag, setErrorFlag] = React.useState(false);
-    const [errorMessage, setErrorMessage] = React.useState("");
+    const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+    const [snackbarMessage, setSnackbarMessage] = React.useState('');
 
     // Hides the password
     const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -47,10 +46,28 @@ const Login = () => {
             setUserToken(responseLogin.data.token);
 
         } catch (error) {
-            console.error('An error occurred during login:', error);
+            if (axios.isAxiosError(error)) {
+                if (error.response) {
+                    showSnackbar(error.response.statusText);
+                } else if (error.request) {
+                    showSnackbar('No response received from the server.');
+                } else {
+                    showSnackbar('Error: ' + error.message);
+                }
+            } else {
+                showSnackbar('An unexpected error occurred.');
+            }
         }
     };
 
+    const showSnackbar = (message: string) => {
+        setSnackbarMessage(message);
+        setSnackbarOpen(true);
+    };
+
+    const handleCloseSnackbar = () => {
+        setSnackbarOpen(false);
+    };
 
     return (
         <Container component="main" maxWidth="xs">
@@ -116,6 +133,17 @@ const Login = () => {
                     </Link>
                 </Box>
             </Box>
+
+            {/* Snackbar for error messages */}
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={6000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+                <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
+                    {snackbarMessage}
+                </Alert>
+            </Snackbar>
         </Container>
     );
 }

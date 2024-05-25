@@ -11,9 +11,13 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import axios from "axios";
 import {useUserStore} from "../../store";
-import {IconButton, InputAdornment} from "@mui/material";
+import {Alert, IconButton, InputAdornment, Snackbar} from "@mui/material";
 import {Visibility, VisibilityOff } from "@mui/icons-material";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+
+// Global Variables
+const validImageTypes = new Set(['image/jpeg', 'image/png', 'image/gif']);
+const emailRegex = /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i;
 
 const Register = () => {
 
@@ -30,30 +34,92 @@ const Register = () => {
     const [email, setEmail] = React.useState("");
     const [password, setPassword] = React.useState("");
     const [showPassword, setShowPassword] = React.useState(false);
-    const [profilePicture, setProfilePicture] = React.useState<File | null>(null);
-    const [profilePictureURL, setProfilePictureURL] = React.useState<string>('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
+    const [userImg, setUserImg] = React.useState<File | null>(null);
+    const [userImgURL, setUserImgURL] = React.useState<string>('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
+
+    // Valid flags
+    const [firstNameValid, setFirstNameValid] = React.useState(false);
+    const [lastNameValid, setLastNameValid] = React.useState(false);
+    const [emailValid, setEmailValid] = React.useState(false);
+    const [passwordValid, setPasswordValid] = React.useState(false);
+    const [imgValid, setImgValid] = React.useState(true);
 
     // Error flags
-    const [errorFlag, setErrorFlag] = React.useState(false);
-    const [errorMessage, setErrorMessage] = React.useState("");
+    const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+    const [snackbarMessage, setSnackbarMessage] = React.useState('');
 
     // Hides the password
     const handleClickShowPassword = () => setShowPassword((show) => !show);
 
     // Handles uploading a profile picture
     const handleChangeImg = (event: React.ChangeEvent<HTMLInputElement>) => {
+        // Get file
         const file = event.target.files?.[0];
-        if (file) {
-            setProfilePicture(file);
-            setProfilePictureURL(URL.createObjectURL(file));
+
+        // Check file and extension
+        if (file && validImageTypes.has(file.type)) {
+            setImgValid(true)
+            setUserImg(file);
+            setUserImgURL(URL.createObjectURL(file));
+        } else {
+            setImgValid(false)
         }
     };
 
     // Handle remove img
     const handleRemoveImg = () => {
-        setProfilePicture(null)
-        setProfilePictureURL('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
+        setImgValid(true);
+        setUserImg(null)
+        setUserImgURL('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
     };
+
+    const handleChangeFirstName = (event: React.ChangeEvent<HTMLInputElement>) => {
+        // Get and set value
+        const temp = event.target.value;
+        setFirstName(temp);
+
+        // Check if valid
+        if (temp.length > 0) {
+            setFirstNameValid(true);
+        } else {
+            setFirstNameValid(false);
+        }
+    }
+
+    const handleChangeLastName = (event: React.ChangeEvent<HTMLInputElement>) => {
+        // Get and set value
+        const temp = event.target.value;
+        setLastName(temp);
+
+        // Check if valid
+        if (temp.length > 0) {
+            setLastNameValid(true);
+        } else {
+            setLastNameValid(false);
+        }
+    }
+
+    const handleChangeEmail = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const temp = event.target.value;
+        setEmail(temp);
+
+        if (emailRegex.test(temp)) {
+            setEmailValid(true);
+        } else {
+            setEmailValid(false);
+        }
+    }
+
+    const handleChangePassword = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const temp = event.target.value;
+        setPassword(temp)
+
+        if (temp.length >= 6) {
+            setPasswordValid(true);
+        } else {
+            setPasswordValid(false);
+        }
+    }
 
     // Submits the register form
     const handleSubmit = async () => {
@@ -84,21 +150,40 @@ const Register = () => {
             setUserToken(userToken);
 
             // Upload profile photo if it exists
-            if (profilePicture) {
-                await axios.put(`http://localhost:3000/api/v1/users/${userId}/image`, profilePicture, {
+            if (userImg) {
+                await axios.put(`http://localhost:3000/api/v1/users/${userId}/image`, userImg, {
                     headers: {
                         "X-Authorization": userToken,
-                        "Content-Type": profilePicture.type
+                        "Content-Type": userImg.type
                     },
                 });
             }
 
             // Navigate to profile page
             navigate('/user/profile');
+
         } catch (error) {
-            setErrorFlag(true);
-            setErrorMessage("There was an error :(");
+            if (axios.isAxiosError(error)) {
+                if (error.response) {
+                    showSnackbar(error.response.statusText);
+                } else if (error.request) {
+                    showSnackbar('No response received from the server.');
+                } else {
+                    showSnackbar('Error: ' + error.message);
+                }
+            } else {
+                showSnackbar('An unexpected error occurred.');
+            }
         }
+    }
+
+    const showSnackbar = (message: string) => {
+        setSnackbarMessage(message);
+        setSnackbarOpen(true);
+    };
+
+    const handleCloseSnackbar = () => {
+        setSnackbarOpen(false);
     };
 
     return (
@@ -119,9 +204,16 @@ const Register = () => {
 
                 {/* Icon */}
                 <Avatar
-                    src={profilePictureURL}
-                    sx={{ width: 100, height: 100, mt:2 }}>
-                </Avatar>
+                    src={userImgURL}
+                    sx={{ width: 100, height: 100, mt: 2 }}
+                />
+
+                {/* Error Message */}
+                {!imgValid && (
+                    <Typography variant="body2" color="error" sx={{ mt: 1, textAlign: 'center' }}>
+                        Please upload a valid profile image to sign up.
+                    </Typography>
+                )}
 
                 {/* Register Form Grid */}
                 <Box sx={{mt: 3}}>
@@ -157,46 +249,50 @@ const Register = () => {
                         {/* First Name */}
                         <Grid item xs={12} sm={6}>
                             <TextField
-                                required
                                 fullWidth
                                 label="First Name"
                                 autoComplete="given-name"
                                 value={firstName}
-                                onChange={(e) => setFirstName(e.target.value)}/>
+                                onChange={handleChangeFirstName}
+                                error={!firstNameValid}
+                                helperText={!firstNameValid ? 'First name is required.' : ''}/>
                         </Grid>
 
                         {/* Last Name */}
                         <Grid item xs={12} sm={6}>
                             <TextField
-                                required
                                 fullWidth
                                 label="Last Name"
                                 autoComplete="family-name"
                                 value={lastName}
-                                onChange={(e) => setLastName(e.target.value)}/>
+                                onChange={handleChangeLastName}
+                                error={!lastNameValid}
+                                helperText={!lastNameValid ? 'Last name is required.' : ''}/>
                         </Grid>
 
                         {/* Email Address */}
                         <Grid item xs={12}>
                             <TextField
-                                required
                                 fullWidth
                                 label="Email Address"
                                 autoComplete="email"
                                 value={email}
-                                onChange={(e) => setEmail(e.target.value)}/>
+                                onChange={handleChangeEmail}
+                                error={!emailValid}
+                                helperText={!emailValid ? 'Please enter a valid email address.' : ''}/>
                         </Grid>
 
                         {/* Password */}
                         <Grid item xs={12}>
                             <TextField
-                                required
                                 fullWidth
                                 label="Password"
                                 type={showPassword ? "text" : "password"}
                                 autoComplete="new-password"
                                 value={password}
-                                onChange={(e) => setPassword(e.target.value)}
+                                onChange={handleChangePassword}
+                                error={!passwordValid}
+                                helperText={!passwordValid ? 'Password must be at least 6 characters.' : ''}
                                 InputProps={{
                                     endAdornment: (
                                         <InputAdornment position="end">
@@ -219,11 +315,6 @@ const Register = () => {
                                 onClick={() => handleSubmit()}>
                                 Sign Up
                             </Button>
-                            {errorFlag && (
-                                <Typography variant="body2" color="error">
-                                    {errorMessage}
-                                </Typography>
-                            )}
                         </Grid>
 
                         {/* Sign Up Button */}
@@ -235,6 +326,17 @@ const Register = () => {
                     </Grid>
                 </Box>
             </Box>
+
+            {/* Snackbar for error messages */}
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={6000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+                <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
+                    {snackbarMessage}
+                </Alert>
+            </Snackbar>
         </Container>
     );
 }
