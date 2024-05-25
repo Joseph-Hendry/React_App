@@ -11,8 +11,11 @@ import {
     Container,
     CssBaseline,
     Box,
-    Grid,
+    Grid, Snackbar, Alert,
 } from '@mui/material';
+
+const validImageTypes = new Set(['image/jpeg', 'image/png', 'image/gif']);
+const emailRegex = /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i;
 
 const EditProfile = () => {
 
@@ -30,14 +33,20 @@ const EditProfile = () => {
     const [lastName, setLastName] = React.useState('');
     const [email, setEmail] = React.useState('');
 
+    // Valid flags
+    const [firstNameValid, setFirstNameValid] = React.useState(true);
+    const [lastNameValid, setLastNameValid] = React.useState(true);
+    const [emailValid, setEmailValid] = React.useState(true);
+    const [imgValid, setImgValid] = React.useState(true);
+
     // Profile photo
     const [userImg, setUserImg] = React.useState<File | null>(null);
     const [userImgURL, setUserImgURL] = React.useState('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
     const [userImgRemoved, setUserImgRemoved] = React.useState(false);
 
     // Error flags
-    const [errorFlag, setErrorFlag] = React.useState(false);
-    const [errorMessage, setErrorMessage] = React.useState('');
+    const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+    const [snackbarMessage, setSnackbarMessage] = React.useState('');
 
     // Get user information
     React.useEffect(() => {
@@ -52,12 +61,8 @@ const EditProfile = () => {
                 setFirstName(response.data.firstName);
                 setLastName(response.data.lastName);
                 setEmail(response.data.email);
-                setErrorFlag(false);
-                setErrorMessage('');
 
-            } catch (error) {
-                setErrorFlag(true);
-            }
+            } catch (error) {}
         };
         getUser();
     }, [userId, userToken]);
@@ -67,26 +72,25 @@ const EditProfile = () => {
         const getUserImg = () => {
             axios.get(`http://localhost:3000/api/v1/users/${userId}/image`, { responseType: "blob" })
                 .then((response) => {
-                    setErrorFlag(false);
-                    setErrorMessage("");
                     setUserImgURL(URL.createObjectURL(response.data));
-                }, (error) => {
-                    setUserImgURL('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
-                });
+                }, (error) => {});
         };
         getUserImg();
     }, [userId, userToken, userChangeFlag]);
 
     // Handle profile picture change
     const handleProfilePictureChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        // Add file if valid
-        if (event.target.files && event.target.files[0]) {
-            // Set not removed
-            setUserImgRemoved(false);
+        // Get file
+        const file = event.target.files?.[0];
 
-            // Set File
-            setUserImg(event.target.files[0]);
-            setUserImgURL(URL.createObjectURL(event.target.files[0]));
+        // Check file and extension
+        if (file && validImageTypes.has(file.type)) {
+            setImgValid(true)
+            setUserImgRemoved(false);
+            setUserImg(file);
+            setUserImgURL(URL.createObjectURL(file));
+        } else {
+            setImgValid(false)
         }
     };
 
@@ -98,6 +102,43 @@ const EditProfile = () => {
             setUserImgURL('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
         }
     };
+
+    const handleChangeFirstName = (event: React.ChangeEvent<HTMLInputElement>) => {
+        // Get and set value
+        const temp = event.target.value;
+        setFirstName(temp);
+
+        // Check if valid
+        if (temp.length > 0) {
+            setFirstNameValid(true);
+        } else {
+            setFirstNameValid(false);
+        }
+    }
+
+    const handleChangeLastName = (event: React.ChangeEvent<HTMLInputElement>) => {
+        // Get and set value
+        const temp = event.target.value;
+        setLastName(temp);
+
+        // Check if valid
+        if (temp.length > 0) {
+            setLastNameValid(true);
+        } else {
+            setLastNameValid(false);
+        }
+    }
+
+    const handleChangeEmail = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const temp = event.target.value;
+        setEmail(temp);
+
+        if (emailRegex.test(temp)) {
+            setEmailValid(true);
+        } else {
+            setEmailValid(false);
+        }
+    }
 
     // Handle cancel
     const handleCancel = () => {
@@ -147,8 +188,27 @@ const EditProfile = () => {
             navigate('/user/profile');
 
         } catch (error) {
-            console.error('An error occurred during login:', error);
+            if (axios.isAxiosError(error)) {
+                if (error.response) {
+                    showSnackbar(error.response.statusText);
+                } else if (error.request) {
+                    showSnackbar('No response received from the server.');
+                } else {
+                    showSnackbar('Error: ' + error.message);
+                }
+            } else {
+                showSnackbar('An unexpected error occurred.');
+            }
         }
+    };
+
+    const showSnackbar = (message: string) => {
+        setSnackbarMessage(message);
+        setSnackbarOpen(true);
+    };
+
+    const handleCloseSnackbar = () => {
+        setSnackbarOpen(false);
     };
 
     return (
@@ -171,6 +231,13 @@ const EditProfile = () => {
                 <Avatar
                     src={userImgURL}
                     sx={{ width: 100, height: 100, mt:2 }}/>
+
+                {/* Error Message */}
+                {!imgValid && (
+                    <Typography variant="body2" color="error" sx={{ mt: 1, textAlign: 'center' }}>
+                        Please upload a valid profile image to sign up.
+                    </Typography>
+                )}
 
                 {/* Form Grid */}
                 <Box sx={{ mt: 3 }}>
@@ -211,7 +278,9 @@ const EditProfile = () => {
                                 label="First Name"
                                 autoComplete="given-name"
                                 value={firstName}
-                                onChange={(e) => setFirstName(e.target.value)}/>
+                                onChange={handleChangeFirstName}
+                                error={!firstNameValid}
+                                helperText={!firstNameValid ? 'First name is required.' : ''}/>
                         </Grid>
 
                         {/* Last Name */}
@@ -222,7 +291,9 @@ const EditProfile = () => {
                                 label="Last Name"
                                 autoComplete="family-name"
                                 value={lastName}
-                                onChange={(e) => setLastName(e.target.value)}/>
+                                onChange={handleChangeLastName}
+                                error={!lastNameValid}
+                                helperText={!lastNameValid ? 'Last name is required.' : ''}/>
                         </Grid>
 
                         {/* Email Address */}
@@ -233,7 +304,9 @@ const EditProfile = () => {
                                 label="Email Address"
                                 autoComplete="email"
                                 value={email}
-                                onChange={(e) => setEmail(e.target.value)}/>
+                                onChange={handleChangeEmail}
+                                error={!emailValid}
+                                helperText={!emailValid ? 'Please enter a valid email address.' : ''}/>
                         </Grid>
 
                         {/* Cancel Button */}
@@ -250,15 +323,19 @@ const EditProfile = () => {
                             </Button>
                         </Grid>
                     </Grid>
-
-                    {/* Error Flag */}
-                    {errorFlag && (
-                        <Typography variant="body2" color="error">
-                            There's an error :(
-                        </Typography>
-                    )}
                 </Box>
             </Box>
+
+            {/* Snackbar for error messages */}
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={6000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+                <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
+                    {snackbarMessage}
+                </Alert>
+            </Snackbar>
         </Container>
     );
 };
