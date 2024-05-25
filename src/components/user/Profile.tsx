@@ -17,7 +17,7 @@ const Profile = () => {
     // User information
     const userId = useUserStore((state) => state.userId);
     const userToken = useUserStore((state) => state.userToken);
-    const userImgURL = useUserStore((state) => state.userImgURL);
+    const userImgFlag = useUserStore((state) => state.userImgFlag);
 
     // Form Variables
     const [user, setUser] = React.useState<User | null>()
