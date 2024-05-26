@@ -51,9 +51,7 @@ const Profile = () => {
                     setErrorFlag(false);
                     setErrorMessage("");
                     setUserImgURL(URL.createObjectURL(response.data));
-                }, (error) => {
-                    setUserImgURL('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
-                });
+                }, (error) => {});
         };
         getUserImg();
     }, [userId, userToken, userChangeFlag]);

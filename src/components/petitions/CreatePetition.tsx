@@ -21,8 +21,13 @@ import {
     FormControl,
     Card,
     CardContent,
-    CardHeader
+    Snackbar,
+    Alert
 } from '@mui/material';
+
+
+// Global Variables
+const validImageTypes = new Set(['image/jpeg', 'image/png', 'image/gif']);
 
 // Title CSS
 const titleStyle: CSS.Properties = {
@@ -45,8 +50,13 @@ const CreatePetition = () => {
     const [categoryId, setCategoryId] = useState('');
 
     // Petition photo
-    const [petitionPicture, setPetitionPicture] = React.useState<File | null>(null);
-    const [petitionPictureURL, setPetitionPictureURL] = React.useState('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
+    const [petitionImg, setPetitionImg] = React.useState<File | null>(null);
+    const [petitionImgURL, setPetitionImgURL] = React.useState('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
+
+    // Valid flags
+    const [titleValid, setTitleValid] = React.useState(false);
+    const [descriptionValid, setDescriptionValid] = React.useState(false);
+    const [imgValid, setImgValid] = React.useState(false);
 
     // Categories
     const [categories, setCategories] = React.useState<Category[] | null>(null);
@@ -54,41 +64,64 @@ const CreatePetition = () => {
     // Support Tiers
     const [supportTiers, setSupportTiers] = useState([{ title: '', description: '', cost: 0 }]);
 
-    // Error flags
-    const [errorFlag, setErrorFlag] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('');
+    // Error Flags
+    const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+    const [snackbarMessage, setSnackbarMessage] = React.useState('');
 
     // Get the list of categories
     React.useEffect(() => {
         const getPetitions = () => {
             axios.get('http://localhost:3000/api/v1/petitions/categories')
                 .then((response) => {
-                    setErrorFlag(false);
-                    setErrorMessage("");
                     setCategories(response.data);
-                }, (error) => {
-                    setErrorFlag(true);
-                    setErrorMessage(error.toString());
-                });
+                }, (error) => {});
         };
         getPetitions();
     }, []);
 
     // Handle petition picture change
     const handlePetitionPictureChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        // Add file if valid
-        if (event.target.files && event.target.files[0]) {
-            // Set File
-            setPetitionPicture(event.target.files[0]);
-            setPetitionPictureURL(URL.createObjectURL(event.target.files[0]));
+        // Get file
+        const file = event.target.files?.[0];
+
+        // Check file and extension
+        if (file && validImageTypes.has(file.type)) {
+            setImgValid(true)
+            setPetitionImg(file);
+            setPetitionImgURL(URL.createObjectURL(file));
+        } else {
+            setImgValid(false)
         }
     };
 
     // Handle remove profile picture
     const handleRemove = () => {
-        setPetitionPicture(null)
-        setPetitionPictureURL('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
+        setImgValid(false)
+        setPetitionImg(null)
+        setPetitionImgURL('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
     };
+
+    const handleChangeTitle = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const temp = event.target.value;
+        setTitle(temp)
+
+        if (temp.length > 0) {
+            setTitleValid(true);
+        } else {
+            setTitleValid(false);
+        }
+    }
+
+    const handleChangeDescription = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const temp = event.target.value;
+        setDescription(temp)
+
+        if (temp.length > 0) {
+            setDescriptionValid(true);
+        } else {
+            setDescriptionValid(false);
+        }
+    }
 
     // Handles category change
     const handleChangeCategory = (event: SelectChangeEvent<typeof categoryId>) => {
@@ -144,23 +177,36 @@ const CreatePetition = () => {
                 },
             });
 
-            // Upload profile photo if it exists
-            if (petitionPicture) {
-                await axios.put(`http://localhost:3000/api/v1/petitions/${response.data.petitionId}/image`, petitionPicture, {
-                    headers: {
-                        "X-Authorization": userToken,
-                        "Content-Type": petitionPicture.type,
-                    },
-                });
-            }
+            // Upload profile photo
+            await axios.put(`http://localhost:3000/api/v1/petitions/${response.data.petitionId}/image`, petitionImg, {
+                headers: {"X-Authorization": userToken, "Content-Type": petitionImg?.type,},
+            });
 
             // Navigate to my petitions page
             navigate("/user/petitions");
 
         } catch (error) {
-            // @ts-ignore
-            console.log(error.response.statusText);
+            if (axios.isAxiosError(error)) {
+                if (error.response) {
+                    showSnackbar(error.response.statusText);
+                } else if (error.request) {
+                    showSnackbar('No response received from the server.');
+                } else {
+                    showSnackbar('Error: ' + error.message);
+                }
+            } else {
+                showSnackbar('An unexpected error occurred.');
+            }
         }
+    };
+
+    const showSnackbar = (message: string) => {
+        setSnackbarMessage(message);
+        setSnackbarOpen(true);
+    };
+
+    const handleCloseSnackbar = () => {
+        setSnackbarOpen(false);
     };
 
     return (
@@ -181,8 +227,15 @@ const CreatePetition = () => {
 
                 {/* Petition Photo */}
                 <Avatar
-                    src={petitionPictureURL}
+                    src={petitionImgURL}
                     sx={{ width: 200, height: 200, mt: 2, borderRadius: 2 }} />
+
+                {/* Error Message */}
+                {!imgValid && (
+                    <Typography variant="body2" color="error" sx={{ mt: 1, textAlign: 'center' }}>
+                        Please upload a valid profile image to sign up.
+                    </Typography>
+                )}
 
                 {/* Form Grid */}
                 <Box sx={{ mt: 3 }}>
@@ -223,7 +276,9 @@ const CreatePetition = () => {
                                 fullWidth
                                 label="Title"
                                 value={title}
-                                onChange={(e) => setTitle(e.target.value)}/>
+                                onChange={handleChangeTitle}
+                                error={!titleValid}
+                                helperText={!titleValid ? 'Title is required.' : ''}/>
                         </Grid>
 
                         {/* Description */}
@@ -235,7 +290,9 @@ const CreatePetition = () => {
                                 rows={4}
                                 label="Description"
                                 value={description}
-                                onChange={(e) => setDescription(e.target.value)}/>
+                                onChange={handleChangeDescription}
+                                error={!descriptionValid}
+                                helperText={!descriptionValid ? 'Description is required.' : ''}/>
                         </Grid>
 
                         {/* Category */}
@@ -264,7 +321,6 @@ const CreatePetition = () => {
 
                     {/* Support Tiers */}
                     <Card sx={{ mt: 3 }}>
-                        <CardHeader title="Support Tiers" />
                         <CardContent>
                             <Grid container spacing={2}>
                                 {supportTiers.map((tier, index) => (
@@ -282,7 +338,9 @@ const CreatePetition = () => {
                                                 fullWidth
                                                 label="Title"
                                                 value={tier.title}
-                                                onChange={(e) => handleSupportTierChange(index, 'title', e.target.value)}/>
+                                                onChange={(e) => handleSupportTierChange(index, 'title', e.target.value)}
+                                                error={!(tier.title.length > 0)}
+                                                helperText={!(tier.title.length > 0) ? 'Title is required.' : ''}/>
                                         </Grid>
 
                                         {/* Description */}
@@ -294,17 +352,23 @@ const CreatePetition = () => {
                                                 rows={2}
                                                 label="Description"
                                                 value={tier.description}
-                                                onChange={(e) => handleSupportTierChange(index, 'description', e.target.value)}/>
+                                                onChange={(e) => handleSupportTierChange(index, 'description', e.target.value)}
+                                                error={!(tier.description.length > 0)}
+                                                helperText={!(tier.description.length > 0) ? 'Description is required.' : ''}/>
                                         </Grid>
 
                                         {/* Cost */}
                                         <Grid item xs={12}>
                                             <TextField
-                                                required
-                                                fullWidth
+                                                margin="dense"
                                                 label="Cost"
+                                                type="number"
+                                                fullWidth
+                                                rows={2}
                                                 value={tier.cost}
-                                                onChange={(e) => handleSupportTierChange(index, 'cost', e.target.value)}/>
+                                                onChange={(e) => handleSupportTierChange(index, 'cost', e.target.value)}
+                                                error={!(tier.cost > 0)}
+                                                helperText={!(tier.cost > 0) ? 'Cost is required.' : ''}/>
                                         </Grid>
 
                                         {/* Remove Support Tier */}
@@ -346,20 +410,24 @@ const CreatePetition = () => {
 
                         {/* Save Button */}
                         <Grid item xs={12} sm={6}>
-                            <Button fullWidth variant="contained" onClick={handleCreate}>
+                            <Button disabled={!petitionImg} fullWidth variant="contained" onClick={handleCreate}>
                                 Create
                             </Button>
                         </Grid>
                     </Grid>
-
-                    {/* Error Flag */}
-                    {errorFlag && (
-                        <Typography variant="body2" color="error">
-                            There's an error :(
-                        </Typography>
-                    )}
                 </Box>
             </Box>
+
+            {/* Snackbar for error messages */}
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={6000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+                <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
+                    {snackbarMessage}
+                </Alert>
+            </Snackbar>
         </Container>
     );
 };
