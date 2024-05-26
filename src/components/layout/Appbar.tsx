@@ -31,21 +31,13 @@ const Appbar = () => {
     // Menu Items
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
 
-    // Error flags
-    const [errorFlag, setErrorFlag] = React.useState(false);
-    const [errorMessage, setErrorMessage] = React.useState("");
-
     // Get user image
     React.useEffect(() => {
         const getUserImg = () => {
             axios.get(`http://localhost:3000/api/v1/users/${userId}/image`, { responseType: "blob" })
                 .then((response) => {
-                    setErrorFlag(false);
-                    setErrorMessage("");
                     setUserImgURL(URL.createObjectURL(response.data));
-                }, (error) => {
-                    setUserImgURL('https://png.pngitem.com/pimgs/s/150-1503945_transparent-user-png-default-user-image-png-png.png');
-                });
+                }, (error) => {});
         };
         getUserImg();
     }, [userId, userToken, userChangeFlag]);
@@ -71,18 +63,24 @@ const Appbar = () => {
         navigate('/user/profile');
     };
 
+    // Handles my petitions button
+    const handleMyPetitions = () => {
+        setAnchorElUser(null);
+        navigate('/user/petitions');
+    };
+
+    // Handles create petitions
+    const handleCreatePetition = () => {
+        setAnchorElUser(null);
+        navigate('/petitions/create');
+    };
+
     // Handles logout button
     const handleLogout = () => {
         setAnchorElUser(null);
         setUserId(-1);
         setUserToken(null);
         navigate('/auth/login');
-    };
-
-    // Handles logout button
-    const handleMyPetitions = () => {
-        setAnchorElUser(null);
-        navigate('/user/petitions');
     };
 
     // Handles login button
@@ -98,6 +96,11 @@ const Appbar = () => {
                 <Typography onClick={handlePetitions} variant="h6" sx={{ display: 'block', marginRight: 5 }}>
                     Petition Site
                 </Typography>
+
+                {/* My Petitions */}
+                <MenuItem onClick={handlePetitions}>
+                    <Typography textAlign="center">Petitions</Typography>
+                </MenuItem>
 
                 {/* Spacer Box */}
                 <Box sx={{ flexGrow: 1, display: 'block', marginRight: 5 }} />
@@ -139,6 +142,11 @@ const Appbar = () => {
                             {/* My Petitions */}
                             <MenuItem onClick={handleMyPetitions}>
                                 <Typography textAlign="center">My Petitions</Typography>
+                            </MenuItem>
+
+                            {/* Create Petition */}
+                            <MenuItem onClick={handleCreatePetition}>
+                                <Typography textAlign="center">Create Petition</Typography>
                             </MenuItem>
 
                             {/* Logout */}
