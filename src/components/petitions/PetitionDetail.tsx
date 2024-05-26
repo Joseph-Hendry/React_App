@@ -256,7 +256,7 @@ const PetitionDetail = () => {
             })
             .catch((error) => {
                 // Handle error
-                console.error(error.response.statusText);
+                showSnackbar(error.response.statusText);
             });
     }
 
